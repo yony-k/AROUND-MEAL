@@ -35,8 +35,7 @@ public class Restaurant {
       String category,
       String restaurantTel,
       double lon,
-      double lat,
-      double ratingAverage) {
+      double lat) {
     this.id = id;
     this.restaurantName = restaurantName;
     this.region = region;
@@ -46,6 +45,5 @@ public class Restaurant {
     this.restaurantTel = restaurantTel;
     this.lon = lon;
     this.lat = lat;
-    this.ratingAverage = ratingAverage;
   }
 }
