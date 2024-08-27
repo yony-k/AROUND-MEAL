@@ -1,0 +1,18 @@
+spring:
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.PostgresSQLDialect
+    hibernate:
+      ddl-auto: create
+    defer-datasource-initialization: true
+    show-sql: true
