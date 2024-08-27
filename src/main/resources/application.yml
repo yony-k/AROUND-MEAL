@@ -7,9 +7,6 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-  h2:
-    console:
-      enabled: true
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect  # 수정된 부분
     hibernate:
