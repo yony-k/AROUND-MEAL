@@ -1,7 +1,9 @@
 package com.lucky.around.meal.entity;
 
-import com.lucky.around.meal.entity.enums.MemberRole;
 import jakarta.persistence.*;
+
+import com.lucky.around.meal.entity.enums.MemberRole;
+
 import lombok.*;
 
 @Getter
@@ -13,13 +15,13 @@ import lombok.*;
 @Table(name = "member")
 public class Member {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long memberId;
 
-    @Column(nullable = false)
-    private String password;
+  @Column(nullable = false)
+  private String password;
 
-    @Enumerated(EnumType.STRING)
-    private MemberRole role;
+  @Enumerated(EnumType.STRING)
+  private MemberRole role;
 }
