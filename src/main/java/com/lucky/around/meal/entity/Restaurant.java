@@ -17,8 +17,8 @@ public class Restaurant {
   @Id private String id;
   @NotNull private String restaurantName;
   @ManyToOne private Region region;
-  private String oldRest;
-  private String newRest;
+  private String jibunDetailAddress;
+  private String doroDetailAddress;
   @NotNull private String category;
   private String restaurantTel;
   private double lon;
@@ -30,8 +30,8 @@ public class Restaurant {
       String id,
       String restaurantName,
       Region region,
-      String oldRest,
-      String newRest,
+      String jibunDetailAddress,
+      String doroDetailAddress,
       String category,
       String restaurantTel,
       double lon,
@@ -39,8 +39,8 @@ public class Restaurant {
     this.id = id;
     this.restaurantName = restaurantName;
     this.region = region;
-    this.oldRest = oldRest;
-    this.newRest = newRest;
+    this.jibunDetailAddress = jibunDetailAddress;
+    this.doroDetailAddress = doroDetailAddress;
     this.category = category;
     this.restaurantTel = restaurantTel;
     this.lon = lon;
