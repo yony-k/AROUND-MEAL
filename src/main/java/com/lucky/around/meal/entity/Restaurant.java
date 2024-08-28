@@ -1,9 +1,13 @@
 package com.lucky.around.meal.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
+
+import com.lucky.around.meal.entity.enums.Category;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,7 +23,11 @@ public class Restaurant {
   @ManyToOne private Region region;
   private String jibunDetailAddress;
   private String doroDetailAddress;
-  @NotNull private String category;
+
+  @NotNull
+  @Enumerated(value = EnumType.STRING)
+  private Category category;
+
   private String restaurantTel;
   private double lon;
   private double lat;
@@ -32,7 +40,7 @@ public class Restaurant {
       Region region,
       String jibunDetailAddress,
       String doroDetailAddress,
-      String category,
+      Category category,
       String restaurantTel,
       double lon,
       double lat) {
