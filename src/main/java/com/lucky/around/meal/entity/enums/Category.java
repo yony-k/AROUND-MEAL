@@ -1,5 +1,7 @@
 package com.lucky.around.meal.entity.enums;
 
+import java.util.Arrays;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -28,4 +30,8 @@ public enum Category {
   ETC("기타");
 
   private String name;
+
+  public static Category of(String name) {
+    return Arrays.stream(values()).filter(value -> name.equals(value.name)).findFirst().orElse(ETC);
+  }
 }

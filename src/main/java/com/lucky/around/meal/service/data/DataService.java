@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucky.around.meal.entity.Restaurant;
+import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.DataExceptionType;
 import com.lucky.around.meal.repository.RestaurantRepository;
@@ -71,10 +72,10 @@ public class DataService {
       JsonNode rowNode = rootNode.path(SERVICE_NAME).path("row").get(0);
 
       // 데이터 추출
-      // todo: tel 추가
       String id = rowNode.path("MGTNO").asText();
       String restaurantName = rowNode.path("BPLCNM").asText();
       String category = rowNode.path("UPTAENM").asText();
+      String restaurantTel = rowNode.path("SITETEL").asText();
       String x = rowNode.path("X").asText();
       String y = rowNode.path("Y").asText();
 
@@ -91,6 +92,7 @@ public class DataService {
       // 결과 데이터
       parsedData.put("id", id);
       parsedData.put("restaurantName", restaurantName);
+      parsedData.put("restaurantTel", restaurantTel);
       parsedData.put("category", category);
       parsedData.put("x", x);
       parsedData.put("y", y);
@@ -106,7 +108,7 @@ public class DataService {
     return parsedData;
   }
 
-  // 서비스 메서드를 동기적으로 호출하고 결과를 저장 - 데이터 수집, 전처리 결과 확인용 메소드
+  // 데이터 수집 & 전처리 확인용 메소드
   public String getResult() {
     String responseData = fetchData().block();
     Map<String, String> parsedData = parseData(responseData);
@@ -122,15 +124,15 @@ public class DataService {
         Restaurant.builder()
             .id(parsedData.get("id"))
             .restaurantName(parsedData.get("restaurantName"))
+            .restaurantTel(parsedData.get("restaurantTel"))
             .jibunDetailAddress(parsedData.get("jibunDetailAddress"))
             .doroDetailAddress(parsedData.get("doroDetailAddress"))
             //            .region()
-            //            .category(Category.valueOf(parsedData.get("category")))
+            .category(Category.of(parsedData.get("category")))
             .lon(Double.parseDouble(parsedData.get("x")))
             .lat(Double.parseDouble(parsedData.get("y")))
             .build();
 
-    log.info("restaurant: " + restaurant.getRestaurantName());
     restaurantRepository.save(restaurant);
   }
 }
