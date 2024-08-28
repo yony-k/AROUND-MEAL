@@ -24,7 +24,7 @@ public class Restaurant {
   private String jibunDetailAddress;
   private String doroDetailAddress;
 
-  @NotNull
+  //  @NotNull
   @Enumerated(value = EnumType.STRING)
   private Category category;
 
