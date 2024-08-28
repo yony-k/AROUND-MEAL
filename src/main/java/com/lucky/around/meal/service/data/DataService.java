@@ -10,8 +10,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lucky.around.meal.entity.Region;
+import com.lucky.around.meal.entity.Restaurant;
+import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.DataExceptionType;
+import com.lucky.around.meal.repository.RegionRepository;
+import com.lucky.around.meal.repository.RestaurantRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -21,6 +26,8 @@ import reactor.core.publisher.Mono;
 public class DataService {
 
   private final WebClient.Builder webClientBuilder;
+  private final RestaurantRepository restaurantRepository;
+  private final RegionRepository regionRepository;
 
   @Value("${API_BASE_URL}")
   private String BASE_URL;
@@ -35,8 +42,13 @@ public class DataService {
   private String FORMAT_TYPE;
 
   @Autowired
-  public DataService(WebClient.Builder webClientBuilder) {
+  public DataService(
+      WebClient.Builder webClientBuilder,
+      RestaurantRepository restaurantRepository,
+      RegionRepository regionRepository) {
     this.webClientBuilder = webClientBuilder;
+    this.restaurantRepository = restaurantRepository;
+    this.regionRepository = regionRepository;
   }
 
   // API 호출
@@ -69,6 +81,7 @@ public class DataService {
       String id = rowNode.path("MGTNO").asText();
       String restaurantName = rowNode.path("BPLCNM").asText();
       String category = rowNode.path("UPTAENM").asText();
+      String restaurantTel = rowNode.path("SITETEL").asText();
       String x = rowNode.path("X").asText();
       String y = rowNode.path("Y").asText();
 
@@ -85,6 +98,7 @@ public class DataService {
       // 결과 데이터
       parsedData.put("id", id);
       parsedData.put("restaurantName", restaurantName);
+      parsedData.put("restaurantTel", restaurantTel);
       parsedData.put("category", category);
       parsedData.put("x", x);
       parsedData.put("y", y);
@@ -100,11 +114,44 @@ public class DataService {
     return parsedData;
   }
 
-  // 서비스 메서드를 동기적으로 호출하고 결과를 저장
+  // 데이터 수집 & 전처리 확인용 메소드
   public String getResult() {
     String responseData = fetchData().block();
     Map<String, String> parsedData = parseData(responseData);
     log.info("parsedData: " + parsedData);
     return "ok";
+  }
+
+  public void saveRestaurant() {
+    String responseData = fetchData().block();
+    Map<String, String> parsedData = parseData(responseData);
+
+    Region region = saveRegion(parsedData.get("dosi"), parsedData.get("sigungu"));
+
+    Restaurant restaurant =
+        Restaurant.builder()
+            .id(parsedData.get("id"))
+            .restaurantName(parsedData.get("restaurantName"))
+            .restaurantTel(parsedData.get("restaurantTel"))
+            .jibunDetailAddress(parsedData.get("jibunDetailAddress"))
+            .doroDetailAddress(parsedData.get("doroDetailAddress"))
+            .region(region)
+            .category(Category.of(parsedData.get("category")))
+            .lon(Double.parseDouble(parsedData.get("x")))
+            .lat(Double.parseDouble(parsedData.get("y")))
+            .build();
+
+    restaurantRepository.save(restaurant);
+  }
+
+  // 데이터 저장 확인용 메소드
+  private Region saveRegion(String dosi, String sigungu) {
+    Region region = regionRepository.findByDosiAndSigungu(dosi, sigungu).orElse(null);
+    if (region == null) {
+      Region newRegion = Region.builder().dosi(dosi).sigungu(sigungu).build();
+      return regionRepository.save(newRegion);
+    }
+
+    return region;
   }
 }
