@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -28,6 +29,7 @@ public class DataService {
   private final WebClient.Builder webClientBuilder;
   private final RestaurantRepository restaurantRepository;
   private final RegionRepository regionRepository;
+  private final ObjectMapper objectMapper;
 
   @Value("${API_BASE_URL}")
   private String BASE_URL;
@@ -45,20 +47,20 @@ public class DataService {
   public DataService(
       WebClient.Builder webClientBuilder,
       RestaurantRepository restaurantRepository,
-      RegionRepository regionRepository) {
+      RegionRepository regionRepository,
+      ObjectMapper objectMapper) {
     this.webClientBuilder = webClientBuilder;
     this.restaurantRepository = restaurantRepository;
     this.regionRepository = regionRepository;
+    this.objectMapper = objectMapper;
   }
 
-  // API 호출
+  // 데이터 수집
   public Mono<String> fetchData() {
     String startIndex = "1";
     String endIndex = "1";
     String uri =
         String.format("/%s/%s/%s/%s/%s", KEY, FORMAT_TYPE, SERVICE_NAME, startIndex, endIndex);
-
-    log.info("[fetchData] API 호출 URI: " + uri);
 
     WebClient webClient = webClientBuilder.baseUrl(BASE_URL).build();
 
@@ -69,63 +71,39 @@ public class DataService {
         .bodyToMono(String.class);
   }
 
-  protected Map<String, String> parseData(String data) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, String> parsedData = new HashMap<>();
-
+  // 데이터 파싱
+  private Map<String, String> parseData(String data) {
     try {
       JsonNode rootNode = objectMapper.readTree(data);
       JsonNode rowNode = rootNode.path(SERVICE_NAME).path("row").get(0);
 
-      // 데이터 추출
-      String id = rowNode.path("MGTNO").asText();
-      String restaurantName = rowNode.path("BPLCNM").asText();
-      String category = rowNode.path("UPTAENM").asText();
-      String restaurantTel = rowNode.path("SITETEL").asText();
-      String x = rowNode.path("X").asText();
-      String y = rowNode.path("Y").asText();
+      // 필요한 데이터 추출 후, Map 으로 만들기
+      Map<String, String> parsedData = new HashMap<>();
+      parsedData.put("id", rowNode.path("MGTNO").asText());
+      parsedData.put("restaurantName", rowNode.path("BPLCNM").asText());
+      parsedData.put("category", rowNode.path("UPTAENM").asText());
+      parsedData.put("restaurantTel", rowNode.path("SITETEL").asText());
+      parsedData.put("x", rowNode.path("X").asText());
+      parsedData.put("y", rowNode.path("Y").asText());
 
       String jibunAddress = rowNode.path("SITEWHLADDR").asText();
       String[] jibunAddresses = jibunAddress.split(" ", 3);
-      String dosi = jibunAddresses[0];
-      String sigungu = jibunAddresses[1];
-      String jibunDetailAddress = jibunAddresses[2];
+      parsedData.put("dosi", jibunAddresses[0]);
+      parsedData.put("sigungu", jibunAddresses[1]);
+      parsedData.put("jibunDetailAddress", jibunAddresses[2]);
 
       String doroAddress = rowNode.path("RDNWHLADDR").asText();
       String[] doroAddresses = doroAddress.split(" ", 3);
-      String doroDetailAddress = doroAddresses[2];
+      parsedData.put("doroDetailAddress", doroAddresses[2]);
 
-      // 결과 데이터
-      parsedData.put("id", id);
-      parsedData.put("restaurantName", restaurantName);
-      parsedData.put("restaurantTel", restaurantTel);
-      parsedData.put("category", category);
-      parsedData.put("x", x);
-      parsedData.put("y", y);
-      parsedData.put("dosi", dosi);
-      parsedData.put("sigungu", sigungu);
-      parsedData.put("jibunDetailAddress", jibunDetailAddress);
-      parsedData.put("doroDetailAddress", doroDetailAddress);
-
+      return parsedData;
     } catch (Exception e) {
       throw new CustomException(DataExceptionType.DATA_PARSING_FAILED);
     }
-
-    return parsedData;
   }
 
-  // 데이터 수집 & 전처리 확인용 메소드
-  public String getResult() {
-    String responseData = fetchData().block();
-    Map<String, String> parsedData = parseData(responseData);
-    log.info("parsedData: " + parsedData);
-    return "ok";
-  }
-
-  public void saveRestaurant() {
-    String responseData = fetchData().block();
-    Map<String, String> parsedData = parseData(responseData);
-
+  // 데이터 저장
+  public void saveData(Map<String, String> parsedData) {
     Region region = saveRegion(parsedData.get("dosi"), parsedData.get("sigungu"));
 
     Restaurant restaurant =
@@ -144,7 +122,6 @@ public class DataService {
     restaurantRepository.save(restaurant);
   }
 
-  // 데이터 저장 확인용 메소드
   private Region saveRegion(String dosi, String sigungu) {
     Region region = regionRepository.findByDosiAndSigungu(dosi, sigungu).orElse(null);
     if (region == null) {
@@ -153,5 +130,21 @@ public class DataService {
     }
 
     return region;
+  }
+
+  // 스케줄러 설정
+  //  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1신
+  @Scheduled(fixedRate = 180_000) // 테스트용 3분 마다 실행
+  public void executeDataPipeline() {
+    try {
+      log.info("[executeDataPipeline] started!");
+      String responseDta = fetchData().block();
+      Map<String, String> parsedData = parseData(responseDta);
+      saveData(parsedData);
+      log.info("[executeDataPipeline] completed!");
+    } catch (Exception e) {
+      log.error("[executeDataPipeline] error - " + e.getMessage());
+      throw new CustomException(DataExceptionType.SCHEDULING_FAILED);
+    }
   }
 }
