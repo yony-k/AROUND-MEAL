@@ -10,10 +10,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lucky.around.meal.entity.Region;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.DataExceptionType;
+import com.lucky.around.meal.repository.RegionRepository;
 import com.lucky.around.meal.repository.RestaurantRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class DataService {
 
   private final WebClient.Builder webClientBuilder;
   private final RestaurantRepository restaurantRepository;
+  private final RegionRepository regionRepository;
 
   @Value("${API_BASE_URL}")
   private String BASE_URL;
@@ -40,9 +43,12 @@ public class DataService {
 
   @Autowired
   public DataService(
-      WebClient.Builder webClientBuilder, RestaurantRepository restaurantRepository) {
+      WebClient.Builder webClientBuilder,
+      RestaurantRepository restaurantRepository,
+      RegionRepository regionRepository) {
     this.webClientBuilder = webClientBuilder;
     this.restaurantRepository = restaurantRepository;
+    this.regionRepository = regionRepository;
   }
 
   // API 호출
@@ -120,6 +126,8 @@ public class DataService {
     String responseData = fetchData().block();
     Map<String, String> parsedData = parseData(responseData);
 
+    Region region = saveRegion(parsedData.get("dosi"), parsedData.get("sigungu"));
+
     Restaurant restaurant =
         Restaurant.builder()
             .id(parsedData.get("id"))
@@ -127,12 +135,23 @@ public class DataService {
             .restaurantTel(parsedData.get("restaurantTel"))
             .jibunDetailAddress(parsedData.get("jibunDetailAddress"))
             .doroDetailAddress(parsedData.get("doroDetailAddress"))
-            //            .region()
+            .region(region)
             .category(Category.of(parsedData.get("category")))
             .lon(Double.parseDouble(parsedData.get("x")))
             .lat(Double.parseDouble(parsedData.get("y")))
             .build();
 
     restaurantRepository.save(restaurant);
+  }
+
+  // 데이터 저장 확인용 메소드
+  private Region saveRegion(String dosi, String sigungu) {
+    Region region = regionRepository.findByDosiAndSigungu(dosi, sigungu).orElse(null);
+    if (region == null) {
+      Region newRegion = Region.builder().dosi(dosi).sigungu(sigungu).build();
+      return regionRepository.save(newRegion);
+    }
+
+    return region;
   }
 }
