@@ -19,15 +19,15 @@ public class Region {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotNull private String doSi;
-  @NotNull private String sgg;
+  @NotNull private String dosi;
+  @NotNull private String sigungu;
   private double lon;
   private double lat;
 
   @Builder
-  private Region(String doSi, String sgg, double lon, double lat) {
-    this.doSi = doSi;
-    this.sgg = sgg;
+  private Region(String dosi, String sigungu, double lon, double lat) {
+    this.dosi = dosi;
+    this.sigungu = sigungu;
     this.lon = lon;
     this.lat = lat;
   }
