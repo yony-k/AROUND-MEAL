@@ -19,7 +19,6 @@ public class DataController {
 
   @GetMapping("/seoul-restaurant-data")
   public String getSeoulRestaurantData() {
-    log.info("[getSeoulRestaurantData] api call");
     return dataService.getResult();
   }
 }
