@@ -1,4 +1,4 @@
-package com.lucky.around.meal.service.data;
+package com.lucky.around.meal.datapipeline.data;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,9 +42,6 @@ public class DataService {
 
   @Value("${API_FORMAT_TYPE}")
   private String FORMAT_TYPE;
-
-  @Value("${API_DATA_SIZE}")
-  private int DATA_SIZE;
 
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
@@ -176,7 +173,7 @@ public class DataService {
 
   // 스케줄러 설정
   //  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
-  @Scheduled(fixedRate = 90_000) // 테스트용 2분 마다 실행
+  @Scheduled(fixedRate = 900_000) // 테스트용
   public void executeDataPipeline() {
     try {
       log.info("[executeDataPipeline] started!");
