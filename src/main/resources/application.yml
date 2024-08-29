@@ -2,14 +2,17 @@ spring:
   web:
     resources:
       add-mappings: false
+
   datasource:
     url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect  # 수정된 부분
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
-    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
