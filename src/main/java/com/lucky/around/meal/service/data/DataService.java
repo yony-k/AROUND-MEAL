@@ -4,8 +4,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
@@ -31,7 +30,7 @@ public class DataService {
   private final WebClient.Builder webClientBuilder;
   private final RestaurantRepository restaurantRepository;
 
-  private final GeometryFactory geometryFactory;
+  private final GeometryUtil geometryUtil;
   private final ObjectMapper objectMapper;
 
   @Value("${API_BASE_URL}")
@@ -56,11 +55,11 @@ public class DataService {
   public DataService(
       WebClient.Builder webClientBuilder,
       RestaurantRepository restaurantRepository,
-      GeometryFactory geometryFactory,
+      GeometryUtil geometryUtil,
       ObjectMapper objectMapper) {
     this.webClientBuilder = webClientBuilder;
     this.restaurantRepository = restaurantRepository;
-    this.geometryFactory = geometryFactory;
+    this.geometryUtil = geometryUtil;
     this.objectMapper = objectMapper;
   }
 
@@ -148,7 +147,9 @@ public class DataService {
   public void saveData(List<Map<String, String>> parsedDataList) {
     try {
       for (Map<String, String> parsedData : parsedDataList) {
-        Point location = getPoint(parsedData.get("x"), parsedData.get("y"));
+        double x = Double.parseDouble(parsedData.get("x"));
+        double y = Double.parseDouble(parsedData.get("y"));
+        Point location = geometryUtil.createPoint(x, y);
 
         Restaurant restaurant =
             Restaurant.builder()
@@ -167,13 +168,6 @@ public class DataService {
     } catch (Exception e) {
       log.error("[saveData] error - " + e);
     }
-  }
-
-  private Point getPoint(final String x, final String y) {
-    double lon = validateCoordinate(x);
-    double lat = validateCoordinate(y);
-
-    return geometryFactory.createPoint(new Coordinate(lon, lat));
   }
 
   // "" 값 일 때, 0.0 넣어주기
