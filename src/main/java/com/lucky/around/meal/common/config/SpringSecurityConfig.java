@@ -126,9 +126,11 @@ public class SpringSecurityConfig {
                     .requestMatchers(
                         "/api/members", "/api/members/login", "/api/members/refresh_token")
                     .permitAll()
+                    .requestMatchers("/api/admin/**")
+                    .hasRole("ADMIN")
                     // 이외 모든 요청 인증 필요
                     .anyRequest()
-                    .authenticated())
+                    .permitAll())
         // 예외 처리 핸들러 설정
         .exceptionHandling(
             exceptionHandling ->
