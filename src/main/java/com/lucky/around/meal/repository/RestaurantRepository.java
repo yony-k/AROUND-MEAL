@@ -10,16 +10,17 @@ import org.springframework.data.repository.query.Param;
 import com.lucky.around.meal.entity.Restaurant;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, String> {
+
   @Query(
       "SELECT r FROM Restaurant r "
-          + "WHERE ST_DWithin(r.location, :location, :range) "
+          + "WHERE ST_Distance(r.location, :location) <= :range "
           + "ORDER BY r.ratingAverage DESC")
   List<Restaurant> findRestaurantsWithinRangeByRating(
       @Param("location") final Point location, @Param("range") final double range);
 
   @Query(
       "SELECT r FROM Restaurant r "
-          + "WHERE ST_DWithin(r.location, :location, :range) "
+          + "WHERE ST_Distance(r.location, :location) <= :range "
           + "ORDER BY ST_Distance(r.location, :location) ASC")
   List<Restaurant> findRestaurantsWithinRangeByDistance(
       @Param("location") final Point location, @Param("range") final double range);
