@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -134,7 +133,7 @@ public class DataService {
 
   // 스케줄러 설정
   //  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
-  @Scheduled(fixedRate = 900_000) // 테스트용 10분 마다 실행
+  //  @Scheduled(fixedRate = 900_000) // 테스트용 10분 마다 실행
   public void executeDataPipeline() {
     try {
       log.info("[executeDataPipeline] started!");
