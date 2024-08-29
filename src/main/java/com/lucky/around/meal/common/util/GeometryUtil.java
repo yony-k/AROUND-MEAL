@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class GeometryUtil {
   private final GeometryFactory geometryFactory;
 
-  public Point createPoint(final double lat, final double lon) {
+  public Point createPoint(final double lon, final double lat) {
     return geometryFactory.createPoint(new Coordinate(lon, lat));
   }
 }
