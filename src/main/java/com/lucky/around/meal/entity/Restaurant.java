@@ -1,5 +1,6 @@
 package com.lucky.around.meal.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -31,7 +32,10 @@ public class Restaurant {
   private Category category;
 
   private String restaurantTel;
+
+  @Column(columnDefinition = "geometry(Point, 4326)")
   private Point location;
+
   private double ratingAverage;
 
   @Builder
