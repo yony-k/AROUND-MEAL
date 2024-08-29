@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,11 +13,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.DataExceptionType;
-import com.lucky.around.meal.repository.RegionRepository;
 import com.lucky.around.meal.repository.RestaurantRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,8 @@ public class DataService {
 
   private final WebClient.Builder webClientBuilder;
   private final RestaurantRepository restaurantRepository;
-  private final RegionRepository regionRepository;
+
+  private final GeometryUtil geometryUtil;
   private final ObjectMapper objectMapper;
 
   @Value("${API_BASE_URL}")
@@ -53,11 +55,11 @@ public class DataService {
   public DataService(
       WebClient.Builder webClientBuilder,
       RestaurantRepository restaurantRepository,
-      RegionRepository regionRepository,
+      GeometryUtil geometryUtil,
       ObjectMapper objectMapper) {
     this.webClientBuilder = webClientBuilder;
     this.restaurantRepository = restaurantRepository;
-    this.regionRepository = regionRepository;
+    this.geometryUtil = geometryUtil;
     this.objectMapper = objectMapper;
   }
 
@@ -145,6 +147,10 @@ public class DataService {
   public void saveData(List<Map<String, String>> parsedDataList) {
     try {
       for (Map<String, String> parsedData : parsedDataList) {
+        double x = Double.parseDouble(parsedData.get("x"));
+        double y = Double.parseDouble(parsedData.get("y"));
+        Point location = geometryUtil.createPoint(x, y);
+
         Restaurant restaurant =
             Restaurant.builder()
                 .id(parsedData.get("id"))
@@ -155,8 +161,7 @@ public class DataService {
                 .dosi(parsedData.get("dosi"))
                 .sigungu(parsedData.get("sigungu"))
                 .category(Category.of(parsedData.get("category")))
-                .lon(validateCoordinate(parsedData.get("x")))
-                .lat(validateCoordinate(parsedData.get("y")))
+                .location(location)
                 .build();
         restaurantRepository.save(restaurant);
       }

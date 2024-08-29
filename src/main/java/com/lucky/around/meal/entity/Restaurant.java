@@ -1,10 +1,13 @@
 package com.lucky.around.meal.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
+
+import org.locationtech.jts.geom.Point;
 
 import com.lucky.around.meal.entity.enums.Category;
 
@@ -29,8 +32,10 @@ public class Restaurant {
   private Category category;
 
   private String restaurantTel;
-  private double lon;
-  private double lat;
+
+  @Column(columnDefinition = "geometry(Point, 4326)")
+  private Point location;
+
   private double ratingAverage;
 
   @Builder
@@ -43,8 +48,7 @@ public class Restaurant {
       String doroDetailAddress,
       Category category,
       String restaurantTel,
-      double lon,
-      double lat) {
+      Point location) {
     this.id = id;
     this.restaurantName = restaurantName;
     this.dosi = dosi;
@@ -53,8 +57,7 @@ public class Restaurant {
     this.doroDetailAddress = doroDetailAddress;
     this.category = category;
     this.restaurantTel = restaurantTel;
-    this.lon = lon;
-    this.lat = lat;
+    this.location = location;
   }
 
   public String getJibunAddress() {
