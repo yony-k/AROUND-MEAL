@@ -4,6 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +19,6 @@ import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.DataExceptionType;
-import com.lucky.around.meal.repository.RegionRepository;
 import com.lucky.around.meal.repository.RestaurantRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,8 @@ public class DataService {
 
   private final WebClient.Builder webClientBuilder;
   private final RestaurantRepository restaurantRepository;
-  private final RegionRepository regionRepository;
+
+  private final GeometryFactory geometryFactory;
   private final ObjectMapper objectMapper;
 
   @Value("${API_BASE_URL}")
@@ -53,11 +56,11 @@ public class DataService {
   public DataService(
       WebClient.Builder webClientBuilder,
       RestaurantRepository restaurantRepository,
-      RegionRepository regionRepository,
+      GeometryFactory geometryFactory,
       ObjectMapper objectMapper) {
     this.webClientBuilder = webClientBuilder;
     this.restaurantRepository = restaurantRepository;
-    this.regionRepository = regionRepository;
+    this.geometryFactory = geometryFactory;
     this.objectMapper = objectMapper;
   }
 
@@ -145,6 +148,8 @@ public class DataService {
   public void saveData(List<Map<String, String>> parsedDataList) {
     try {
       for (Map<String, String> parsedData : parsedDataList) {
+        Point location = getPoint(parsedData.get("x"), parsedData.get("y"));
+
         Restaurant restaurant =
             Restaurant.builder()
                 .id(parsedData.get("id"))
@@ -155,14 +160,20 @@ public class DataService {
                 .dosi(parsedData.get("dosi"))
                 .sigungu(parsedData.get("sigungu"))
                 .category(Category.of(parsedData.get("category")))
-                .lon(validateCoordinate(parsedData.get("x")))
-                .lat(validateCoordinate(parsedData.get("y")))
+                .location(location)
                 .build();
         restaurantRepository.save(restaurant);
       }
     } catch (Exception e) {
       log.error("[saveData] error - " + e);
     }
+  }
+
+  private Point getPoint(final String x, final String y) {
+    double lon = validateCoordinate(x);
+    double lat = validateCoordinate(y);
+
+    return geometryFactory.createPoint(new Coordinate(lon, lat));
   }
 
   // "" 값 일 때, 0.0 넣어주기
