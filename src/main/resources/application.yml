@@ -2,14 +2,19 @@ spring:
   web:
     resources:
       add-mappings: false
+
   datasource:
     url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect  # 수정된 부분
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisDialect  # PostGIS를 위한 Hibernate dialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect  # PostGIS Dialect 설정
     show-sql: true
     defer-datasource-initialization: true
