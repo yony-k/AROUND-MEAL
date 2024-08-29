@@ -5,7 +5,8 @@ import java.util.List;
 public record RestaurantDetailResponseDto(
     String restaurantId,
     String restaurantName,
-    Long region,
+    String dosi,
+    String sigungu,
     String jibunDetailAddress,
     String doroDetailAddress,
     String category,
