@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -99,6 +100,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // redis에 refreshToken 저장
     refreshTokenRepository.save(
         new RefreshToken(refreshTokenPrefix + jwtRecord.refreshToken(), authResult.getName()));
+
+    response.setStatus(HttpStatus.OK.value());
+    response.setContentType("text/plain; charset=UTF-8");
+    response.getWriter().write("로그인 성공");
+    response.getWriter().flush();
   }
 
   // 로그인 인증 실패시 실행되는 메소드

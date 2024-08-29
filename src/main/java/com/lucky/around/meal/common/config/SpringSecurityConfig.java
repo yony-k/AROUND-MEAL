@@ -19,10 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.lucky.around.meal.common.security.filter.JwtAuthenticationFilter;
 import com.lucky.around.meal.common.security.filter.JwtAuthorizationFilter;
-import com.lucky.around.meal.common.security.handler.CustomAccessDeniedHandler;
-import com.lucky.around.meal.common.security.handler.CustomAuthenticationEntryPoint;
-import com.lucky.around.meal.common.security.handler.CustomAuthenticationFailureHandler;
-import com.lucky.around.meal.common.security.handler.CustomLogoutSuccessHandler;
+import com.lucky.around.meal.common.security.handler.*;
 import com.lucky.around.meal.common.security.redis.RefreshTokenRepository;
 import com.lucky.around.meal.common.security.util.CookieProvider;
 import com.lucky.around.meal.common.security.util.JwtProvider;
@@ -47,6 +44,7 @@ public class SpringSecurityConfig {
   private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
   private final CustomAccessDeniedHandler customAccessDeniedHandler;
+  private final CustomLogoutHandler customLogoutHandler;
   private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
   // accessToken 헤더 이름
@@ -56,8 +54,6 @@ public class SpringSecurityConfig {
   // 비밀번호 암호화
   @Bean
   public static BCryptPasswordEncoder passwordEncoder() {
-    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    System.out.println("임시:" + encoder.encode("123456"));
     return new BCryptPasswordEncoder();
   }
 
@@ -143,6 +139,7 @@ public class SpringSecurityConfig {
         .logout(
             logout ->
                 logout
+                    .addLogoutHandler(customLogoutHandler)
                     .logoutSuccessHandler(customLogoutSuccessHandler)
                     .logoutUrl("/api/members/logout"));
     // 커스텀 필터 설정
