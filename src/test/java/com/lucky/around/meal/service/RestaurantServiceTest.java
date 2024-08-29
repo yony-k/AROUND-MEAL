@@ -7,8 +7,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import org.junit.jupiter.api.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.mockito.*;
 
+import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.controller.response.*;
 import com.lucky.around.meal.entity.*;
 import com.lucky.around.meal.entity.enums.Category;
@@ -38,6 +42,8 @@ class RestaurantServiceTest {
 
   @InjectMocks private RestaurantService restaurantService;
 
+  @Mock private GeometryUtil geometryUtil;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -47,6 +53,9 @@ class RestaurantServiceTest {
   @DisplayName("맛집 상세 정보 조회 성공")
   void getRestaurantDetail_success() {
     // Given
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Point mockLocation = geometryFactory.createPoint(new Coordinate(LON, LAT));
+    when(geometryUtil.createPoint(LON, LAT)).thenReturn(mockLocation);
     Restaurant restaurant = createRestaurant();
     Rating rating = createRating(restaurant);
     when(restaurantRepository.findById(RESTAURANT_ID)).thenReturn(Optional.of(restaurant));
@@ -74,6 +83,7 @@ class RestaurantServiceTest {
   }
 
   private Restaurant createRestaurant() {
+    Point location = geometryUtil.createPoint(LON, LAT);
     return Restaurant.builder()
         .id(RESTAURANT_ID)
         .restaurantName(RESTAURANT_NAME)
@@ -83,8 +93,7 @@ class RestaurantServiceTest {
         .doroDetailAddress(DORO_ADDRESS)
         .category(Category.FAMILY_RESTAURANT)
         .restaurantTel(RESTAURANT_TEL)
-        .lon(LON)
-        .lat(LAT)
+        .location(location)
         .build();
   }
 
