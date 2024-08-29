@@ -33,11 +33,13 @@ public class Rating {
   private LocalDateTime createAt;
 
   @Builder
-  public Rating(Member member, Restaurant restaurant, Integer score, String content) {
+  public Rating(
+      Member member, Restaurant restaurant, Integer score, String content, LocalDateTime createAt) {
     this.member = member;
     this.restaurant = restaurant;
     this.score = score;
     this.content = content;
+    this.createAt = createAt;
   }
 
   @PrePersist
