@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class RestaurantService {
   private final RestaurantRepository restaurantRepository;
 
-  public List<GetRestaurantsDto> getRestaurants(
+  public List<GetRestaurantsDto> getRestaurantsWithinRange(
       final double lat, final double lon, final double range, final String sort) {
     List<Restaurant> restaurants;
 

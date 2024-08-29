@@ -25,6 +25,6 @@ public class RestaurantController {
       final @RequestParam double range,
       final @RequestParam(defaultValue = "distance") String sort) {
 
-    return restaurantService.getRestaurants(lat, lon, range, sort);
+    return restaurantService.getRestaurantsWithinRange(lat, lon, range, sort);
   }
 }
