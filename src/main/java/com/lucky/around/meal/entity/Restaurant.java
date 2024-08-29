@@ -54,4 +54,12 @@ public class Restaurant {
     this.lon = lon;
     this.lat = lat;
   }
+
+  public String getJibunAddress() {
+    return region.getDosi() + " " + region.getSigungu() + " " + jibunDetailAddress;
+  }
+
+  public String getDoroAddress() {
+    return region.getDosi() + " " + region.getSigungu() + " " + doroDetailAddress;
+  }
 }
