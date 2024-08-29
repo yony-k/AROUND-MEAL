@@ -12,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lucky.around.meal.entity.Region;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.exception.CustomException;
@@ -93,7 +92,6 @@ public class DataService {
           .map(
               rowNode -> {
                 Map<String, String> parsedData = new HashMap<>();
-                //                parsedData.put("id", rowNode.path("MGTNO").asText());
                 parsedData.put("id", getOrEmpty(rowNode, "MGTNO"));
                 parsedData.put("restaurantName", getOrEmpty(rowNode, "BPLCNM"));
                 parsedData.put("category", getOrEmpty(rowNode, "UPTAENM"));
@@ -147,8 +145,6 @@ public class DataService {
   public void saveData(List<Map<String, String>> parsedDataList) {
     try {
       for (Map<String, String> parsedData : parsedDataList) {
-        Region region = saveRegion(parsedData.get("dosi"), parsedData.get("sigungu"));
-
         Restaurant restaurant =
             Restaurant.builder()
                 .id(parsedData.get("id"))
@@ -156,12 +152,12 @@ public class DataService {
                 .restaurantTel(parsedData.get("restaurantTel"))
                 .jibunDetailAddress(parsedData.get("jibunDetailAddress"))
                 .doroDetailAddress(parsedData.get("doroDetailAddress"))
-                .region(region)
+                .dosi(parsedData.get("dosi"))
+                .sigungu(parsedData.get("sigungu"))
                 .category(Category.of(parsedData.get("category")))
                 .lon(validateCoordinate(parsedData.get("x")))
                 .lat(validateCoordinate(parsedData.get("y")))
                 .build();
-
         restaurantRepository.save(restaurant);
       }
     } catch (Exception e) {
@@ -176,16 +172,6 @@ public class DataService {
     }
 
     return Double.parseDouble(coordinate);
-  }
-
-  private Region saveRegion(String dosi, String sigungu) {
-    Region region = regionRepository.findByDosiAndSigungu(dosi, sigungu).orElse(null);
-    if (region == null) {
-      Region newRegion = Region.builder().dosi(dosi).sigungu(sigungu).build();
-      return regionRepository.save(newRegion);
-    }
-
-    return region;
   }
 
   // 스케줄러 설정
