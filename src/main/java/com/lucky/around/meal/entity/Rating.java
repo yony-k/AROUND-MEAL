@@ -1,11 +1,10 @@
 package com.lucky.around.meal.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -31,12 +30,22 @@ public class Rating {
 
   private Integer score;
   private String content;
+  private LocalDateTime createAt;
 
   @Builder
-  public Rating(Member member, Restaurant restaurant, Integer score, String content) {
+  public Rating(
+      Member member, Restaurant restaurant, Integer score, String content, LocalDateTime createAt) {
     this.member = member;
     this.restaurant = restaurant;
     this.score = score;
     this.content = content;
+    this.createAt = createAt;
+  }
+
+  @PrePersist
+  public void prePersist() {
+    if (this.createAt == null) {
+      this.createAt = LocalDateTime.now();
+    }
   }
 }
