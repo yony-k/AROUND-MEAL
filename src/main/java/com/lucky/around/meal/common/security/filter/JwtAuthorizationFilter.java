@@ -43,6 +43,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     // request에서 accessToken 찾고 검증
     String accessToken = jwtProvider.validateToken(request);
+
     if (accessToken != null) {
       try {
         // accessToken을 사용해서 인증객체 등록
@@ -53,9 +54,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         throw new AuthenticationException(
             SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage()) {};
       }
-    } else {
-      throw new AuthenticationException(
-          SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage()) {};
     }
     filterChain.doFilter(request, response);
   }

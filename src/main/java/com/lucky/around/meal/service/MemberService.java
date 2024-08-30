@@ -1,5 +1,6 @@
 package com.lucky.around.meal.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.lucky.around.meal.common.security.details.PrincipalDetails;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberService {
 
   private final MemberRepository memberRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   // 계정명 중복 검증
   public void isExistInDB(RegisterRecord registerRecord) {
@@ -33,8 +35,10 @@ public class MemberService {
 
   // 회원가입
   public void signUp(RegisterRecord registerRecord) {
+    // 비밀번호 암호화
+    String password = bCryptPasswordEncoder.encode(registerRecord.password());
     // RegisterRecord 를 Member 엔티티로 변환
-    Member member = registerRecord.toMember();
+    Member member = registerRecord.toMember(password);
     // DB 저장
     memberRepository.save(member);
   }

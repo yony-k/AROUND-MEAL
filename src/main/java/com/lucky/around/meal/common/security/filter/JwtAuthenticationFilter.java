@@ -91,6 +91,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       FilterChain chain,
       Authentication authResult)
       throws IOException, ServletException {
+
     // 인증 객체를 이용해 jwt 생성
     JwtRecord jwtRecord = jwtProvider.getLoginToken(authResult);
     // accessToken은 헤더에 저장
