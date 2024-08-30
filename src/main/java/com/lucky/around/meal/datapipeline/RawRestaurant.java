@@ -30,4 +30,8 @@ public class RawRestaurant {
     this.hash = hash;
     this.isUpdated = isUpdated;
   }
+
+  public void cancelUpdated() {
+    this.isUpdated = false;
+  }
 }

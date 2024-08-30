@@ -1,11 +1,12 @@
 package com.lucky.around.meal.datapipeline;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,13 +30,13 @@ public class DataProcessingService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  //  @Scheduled(fixedRate = 900_000)
+  @Scheduled(fixedRate = 90_000)
   public void processRawData() {
     try {
       int page = 0;
 
       while (true) {
-        PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE);
+        Pageable pageRequest = PageRequest.of(page, PAGE_SIZE);
         Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
 
         if (rawRestaurantsPage.isEmpty()) {
@@ -43,12 +44,18 @@ public class DataProcessingService {
         }
 
         List<RawRestaurant> rawRestaurants = rawRestaurantsPage.getContent();
-        List<Restaurant> processedRestaurants =
-            rawRestaurants.stream()
-                .map(this::convertToProcessedRestaurant)
-                .collect(Collectors.toList());
 
-        restaurantRepository.saveAll(processedRestaurants);
+        for (RawRestaurant rawRestaurant : rawRestaurants) {
+          if (rawRestaurant.isUpdated()) {
+            log.info("변경된 레스토랑은 : " + rawRestaurant.getJsonData());
+            Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
+            if (processedRestaurant != null) {
+              restaurantRepository.save(processedRestaurant);
+              rawRestaurant.cancelUpdated();
+              rawRestaurantRepository.save(rawRestaurant);
+            }
+          }
+        }
 
         page++;
       }

@@ -1,7 +1,6 @@
 package com.lucky.around.meal.datapipeline;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -51,6 +50,7 @@ public class RawDataSaveService {
       initialSaveRawData(id, jsonData);
       return;
     }
+
     String newHash = HashUtil.generateSHA256Hash(jsonData);
 
     if (!existedRawRestaurant.getHash().equals(newHash)) {
@@ -64,11 +64,11 @@ public class RawDataSaveService {
     String hash = HashUtil.generateSHA256Hash(jsonData);
 
     RawRestaurant rawRestaurant =
-        RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(false).hash(hash).build();
+        RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(hash).build();
     rawRestaurantRepository.save(rawRestaurant);
   }
 
-  @Scheduled(fixedRate = 90_000)
+  //  @Scheduled(fixedRate = 90_000)
   public void executeDataFetch() {
     try {
       int startIndex = 1;
