@@ -1,10 +1,7 @@
 package com.lucky.around.meal.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.lucky.around.meal.controller.record.RegisterRecord;
 import com.lucky.around.meal.service.MemberService;
@@ -21,7 +18,7 @@ public class MemberController {
   private final MemberService memberService;
 
   @PostMapping
-  public ResponseEntity<String> singUp(@RequestBody RegisterRecord registerRecord) {
+  public ResponseEntity<String> signUp(@RequestBody RegisterRecord registerRecord) {
     // 계정명 중복 검증
     memberService.isExistInDB(registerRecord);
     // 회원가입
