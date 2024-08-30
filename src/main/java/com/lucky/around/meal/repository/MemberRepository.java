@@ -8,4 +8,6 @@ import com.lucky.around.meal.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, String> {
   Optional<Member> findByMemberName(String memberName);
+
+  boolean existsByMemberName(String memberName);
 }
