@@ -23,7 +23,7 @@ public class PrincipalDetailsService implements UserDetailsService {
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     Member member =
         memberRepository
-            .findById(username)
+            .findByMemberName(username)
             .orElseThrow(
                 () ->
                     new UsernameNotFoundException(
