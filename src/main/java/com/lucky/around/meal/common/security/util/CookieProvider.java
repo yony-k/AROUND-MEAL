@@ -46,15 +46,28 @@ public class CookieProvider {
   // 로그아웃 시 리프레시 토큰 삭제
   public Cookie deleteRefreshTokenCookie(HttpServletRequest request) {
     // 리퀘스트에서 refreshToken 빼오기
-    Optional<Cookie> findCookie =
-        Arrays.stream(request.getCookies())
-            .filter(cookie -> cookieName.equals(cookie.getName()))
-            .findFirst();
+    Optional<Cookie> findCookie = getRefreshTokenCookie(request);
     // 토큰 만료기간 0으로 설정
     if (findCookie.isPresent()) {
       Cookie cookie = findCookie.get();
       cookie.setMaxAge(0);
       return cookie;
+    } else {
+      throw new CustomException(SecurityExceptionType.COOKIE_NOT_FOUND);
+    }
+  }
+
+  // 리퀘스트에서 리프레시 토큰 빼오기
+  public Optional<Cookie> getRefreshTokenCookie(HttpServletRequest request) {
+    return Arrays.stream(request.getCookies())
+        .filter(cookie -> cookieName.equals(cookie.getName()))
+        .findFirst();
+  }
+
+  // 리프레시 토큰 담은 쿠키 재발급
+  public Cookie reissueRefreshTokenCookie(Optional<Cookie> cookie, String refreshToken) {
+    if (cookie.isPresent()) {
+      return createRefreshTokenCookie(refreshToken);
     } else {
       throw new CustomException(SecurityExceptionType.COOKIE_NOT_FOUND);
     }
