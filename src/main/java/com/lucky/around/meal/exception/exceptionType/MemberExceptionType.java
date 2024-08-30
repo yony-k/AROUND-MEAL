@@ -9,18 +9,18 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum MemberExceptionType implements ExceptionType {
-  MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 아이디의 회원이 없습니다.");
+  NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다.");
 
   private final HttpStatus status;
   private final String message;
 
   @Override
   public HttpStatus status() {
-    return null;
+    return this.status;
   }
 
   @Override
   public String message() {
-    return null;
+    return this.message;
   }
 }

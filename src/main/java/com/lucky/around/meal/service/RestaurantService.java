@@ -71,7 +71,7 @@ public class RestaurantService {
         restaurant.getRestaurantTel(),
         restaurant.getLocation().getX(),
         restaurant.getLocation().getY(),
-        // restaurant.getRatingAverage(),
+        restaurant.getRatingAverage(),
         ratings);
   }
 
