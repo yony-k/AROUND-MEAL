@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
+
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
@@ -85,7 +87,11 @@ public class CustomExceptionHandler {
   // Spring Security 인증, 인가 관련 예외 처리
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    String message = ex.getMessage();
+    if (ex.getMessage().equals("Full authentication is required to access this resource")) {
+      message = SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage();
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
   }
 
   // Spring Security 권한 관련 예외 처리
