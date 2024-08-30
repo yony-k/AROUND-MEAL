@@ -2,9 +2,12 @@ package com.lucky.around.meal.service;
 
 import org.springframework.stereotype.Service;
 
+import com.lucky.around.meal.common.security.details.PrincipalDetails;
+import com.lucky.around.meal.controller.dto.MemberDto;
 import com.lucky.around.meal.controller.record.RegisterRecord;
 import com.lucky.around.meal.entity.Member;
 import com.lucky.around.meal.exception.CustomException;
+import com.lucky.around.meal.exception.exceptionType.MemberExceptionType;
 import com.lucky.around.meal.exception.exceptionType.RegisterExceptionType;
 import com.lucky.around.meal.repository.MemberRepository;
 
@@ -34,5 +37,19 @@ public class MemberService {
     Member member = registerRecord.toMember();
     // DB 저장
     memberRepository.save(member);
+  }
+
+  // 사용자 정보 반환
+  public MemberDto getMemberInfo(PrincipalDetails principalDetails) {
+
+    // 인증객체에서 Member 객체 가져오기
+    Member loginMember = principalDetails.getMember();
+
+    // 인증객체 이용해서 DB에서 Member 객체 가져오기(최신정보)
+    Member newMember =
+        memberRepository
+            .findById(loginMember.getMemberId())
+            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
+    return new MemberDto(newMember);
   }
 }

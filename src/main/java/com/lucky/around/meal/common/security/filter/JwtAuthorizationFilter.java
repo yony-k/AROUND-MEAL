@@ -9,11 +9,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.lucky.around.meal.common.security.util.JwtProvider;
+import com.lucky.around.meal.exception.CustomException;
+import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +45,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     String accessToken = jwtProvider.validateToken(request);
     if (accessToken != null) {
       try {
+        // accessToken을 사용해서 인증객체 등록
         SecurityContextHolder.getContext()
             .setAuthentication(jwtProvider.getAuthentication(accessToken));
-        filterChain.doFilter(request, response);
-      } catch (AuthenticationServiceException e) {
-        throw e;
+      } catch (CustomException ex) {
+        SecurityContextHolder.clearContext();
+        throw new AuthenticationException(
+            SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage()) {};
       }
+    } else {
+      throw new AuthenticationException(
+          SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage()) {};
     }
     filterChain.doFilter(request, response);
   }

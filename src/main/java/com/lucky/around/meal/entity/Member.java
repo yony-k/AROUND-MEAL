@@ -32,8 +32,8 @@ public class Member {
   private MemberRole role;
 
   @Column(nullable = true)
-  private long lat;
+  private double lat;
 
   @Column(nullable = true)
-  private long lon;
+  private double lon;
 }
