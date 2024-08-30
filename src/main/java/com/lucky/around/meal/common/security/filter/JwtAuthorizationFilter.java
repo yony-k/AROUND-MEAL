@@ -41,15 +41,20 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     // request에서 accessToken 찾고 검증
     String accessToken = jwtProvider.getAccessToken(request);
-    if (StringUtils.hasText(accessToken) || accessToken.startsWith("Bearer ")) {
-      try {
-        // accessToken을 사용해서 인증객체 등록
-        SecurityContextHolder.getContext()
-            .setAuthentication(jwtProvider.getAuthentication(accessToken));
-      } catch (Exception e) {
-        request.setAttribute("exception", e);
+
+    if (accessToken == null) {
+      filterChain.doFilter(request, response);
+    } else {
+      if (StringUtils.hasText(accessToken) || accessToken.startsWith("Bearer ")) {
+        try {
+          // accessToken을 사용해서 인증객체 등록
+          SecurityContextHolder.getContext()
+              .setAuthentication(jwtProvider.getAuthentication(accessToken));
+        } catch (Exception e) {
+          request.setAttribute("exception", e);
+        }
       }
+      filterChain.doFilter(request, response);
     }
-    filterChain.doFilter(request, response);
   }
 }
