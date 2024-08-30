@@ -8,7 +8,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,15 +17,18 @@ import org.springframework.util.StringUtils;
 
 import com.lucky.around.meal.common.security.details.PrincipalDetailsService;
 import com.lucky.around.meal.common.security.record.JwtRecord;
+import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
   private final PrincipalDetailsService principalDetailsService;
@@ -53,14 +55,6 @@ public class JwtProvider {
 
   // jwt 파싱 암호키
   private SecretKey key;
-
-  // jwt 파싱 암호키를 바이트화하여 저장
-  public JwtProvider(
-      @Value("${jwt.secret}") String secretKey, PrincipalDetailsService principalDetailsService) {
-    this.principalDetailsService = principalDetailsService;
-    byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-    this.key = Keys.hmacShaKeyFor(keyBytes);
-  }
 
   // 객체 생성 후 초기화
   @PostConstruct
@@ -89,14 +83,14 @@ public class JwtProvider {
         Jwts.builder()
             .subject(memberId)
             .claim("authorities", authorities)
-            .expiration(new Date(now + accessTokenTTL))
+            .expiration(new Date(now + (accessTokenTTL * 1000)))
             .signWith(key)
             .compact();
     // 리프레시 토큰 생성
     String refreshToken =
         Jwts.builder()
             .subject(memberId)
-            .expiration(new Date(now + refreshTokenTTL))
+            .expiration(new Date(now + (refreshTokenTTL * 1000)))
             .signWith(key)
             .compact();
 
@@ -116,28 +110,27 @@ public class JwtProvider {
   }
 
   // 인증 객체 리턴
-  public Authentication getAuthentication(String accessToken) {
+  public Authentication getAuthentication(String token) {
+
+    String accessToken = token.substring(prefix.length());
+
     try {
       // 액세스 토큰 해석하여 정보 가져오기
-      Claims userinfo =
+      Claims claims =
           Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken).getPayload();
       // 액세스 토큰에 담긴 memberId로 PrincipalDetails 객체 가져오기
-      UserDetails userDetails = principalDetailsService.loadUserByUsername(userinfo.getSubject());
+      UserDetails userDetails = principalDetailsService.loadUserByUsername(claims.getSubject());
       // 가져온 객체를 이용해 인증객체 만들기
       return new UsernamePasswordAuthenticationToken(
           userDetails, null, userDetails.getAuthorities());
     } catch (SecurityException | MalformedJwtException e) {
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.INVALID_JWT_SIGNATURE.getMessage(), e);
+      throw new CustomException(SecurityExceptionType.INVALID_JWT_TOKEN);
     } catch (ExpiredJwtException e) {
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.EXPIRED_JWT_TOKEN.getMessage(), e);
+      throw new CustomException(SecurityExceptionType.EXPIRED_JWT_TOKEN);
     } catch (UnsupportedJwtException e) {
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.UNSUPPORTED_JWT_TOKEN.getMessage(), e);
+      throw new CustomException(SecurityExceptionType.UNSUPPORTED_JWT_TOKEN);
     } catch (IllegalArgumentException e) {
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.EMPTY_JWT_CLAIMS.getMessage(), e);
+      throw new CustomException(SecurityExceptionType.EMPTY_JWT_CLAIMS);
     }
   }
 }

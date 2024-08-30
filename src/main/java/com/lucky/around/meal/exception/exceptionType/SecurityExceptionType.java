@@ -27,6 +27,7 @@ public enum SecurityExceptionType implements ExceptionType {
   EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 JWT token 입니다."),
   UNSUPPORTED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "지원되지 않는 JWT 토큰 입니다."),
   EMPTY_JWT_CLAIMS(HttpStatus.UNAUTHORIZED, "JWT 클레임이 비어 있습니다."),
+  REQUIRED_AUTHENTICATION(HttpStatus.UNAUTHORIZED, "로그인 후 다시 요청해주세요."),
 
   // 404 Not Found
   // CustomLogoutSuccessHandler(로그아웃 성공 핸들러) 오류
