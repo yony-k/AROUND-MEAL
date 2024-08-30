@@ -35,6 +35,12 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       HttpServletResponse response,
       AuthenticationException authException)
       throws IOException, ServletException {
-    resolver.resolveException(request, response, null, authException);
+
+    Exception e = (Exception) request.getAttribute("exception");
+    if (e != null) {
+      resolver.resolveException(request, response, null, e);
+    } else {
+      resolver.resolveException(request, response, null, authException);
+    }
   }
 }

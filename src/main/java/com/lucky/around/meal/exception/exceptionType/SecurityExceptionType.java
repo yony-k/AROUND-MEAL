@@ -42,11 +42,11 @@ public enum SecurityExceptionType implements ExceptionType {
 
   @Override
   public HttpStatus status() {
-    return null;
+    return this.status;
   }
 
   @Override
   public String message() {
-    return "";
+    return this.message;
   }
 }

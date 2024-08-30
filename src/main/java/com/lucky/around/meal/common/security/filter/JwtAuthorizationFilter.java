@@ -9,13 +9,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.lucky.around.meal.common.security.util.JwtProvider;
-import com.lucky.around.meal.exception.CustomException;
-import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,19 +40,21 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     // request에서 accessToken 찾고 검증
-    String accessToken = jwtProvider.validateToken(request);
+    String accessToken = jwtProvider.getAccessToken(request);
 
-    if (accessToken != null) {
-      try {
-        // accessToken을 사용해서 인증객체 등록
-        SecurityContextHolder.getContext()
-            .setAuthentication(jwtProvider.getAuthentication(accessToken));
-      } catch (CustomException ex) {
-        SecurityContextHolder.clearContext();
-        throw new AuthenticationException(
-            SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage()) {};
+    if (accessToken == null) {
+      filterChain.doFilter(request, response);
+    } else {
+      if (StringUtils.hasText(accessToken) || accessToken.startsWith("Bearer ")) {
+        try {
+          // accessToken을 사용해서 인증객체 등록
+          SecurityContextHolder.getContext()
+              .setAuthentication(jwtProvider.getAuthentication(accessToken));
+        } catch (Exception e) {
+          request.setAttribute("exception", e);
+        }
       }
+      filterChain.doFilter(request, response);
     }
-    filterChain.doFilter(request, response);
   }
 }
