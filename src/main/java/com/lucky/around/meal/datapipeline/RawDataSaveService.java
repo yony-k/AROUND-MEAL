@@ -1,6 +1,7 @@
 package com.lucky.around.meal.datapipeline;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -18,6 +19,7 @@ public class RawDataSaveService {
 
   private final WebClient.Builder webClientBuilder;
   private final RawRestaurantRepository rawRestaurantRepository;
+  private final DataProcessingService dataProcessingService;
   private final ObjectMapper objectMapper;
   private boolean isInitialExecute = true; // 최초 실행 감지
 
@@ -68,7 +70,7 @@ public class RawDataSaveService {
     rawRestaurantRepository.save(rawRestaurant);
   }
 
-  //  @Scheduled(fixedRate = 90_000)
+  @Scheduled(fixedRate = 90_000)
   public void executeDataFetch() {
     try {
       int startIndex = 1;
@@ -98,6 +100,8 @@ public class RawDataSaveService {
           isInitialExecute = false;
         }
       }
+
+      dataProcessingService.processRawData();
     } catch (Exception e) {
       e.printStackTrace();
     }

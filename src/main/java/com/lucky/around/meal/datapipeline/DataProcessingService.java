@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,7 +29,7 @@ public class DataProcessingService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  @Scheduled(fixedRate = 90_000)
+  //  @Scheduled(fixedRate = 90_000)
   public void processRawData() {
     try {
       int page = 0;
