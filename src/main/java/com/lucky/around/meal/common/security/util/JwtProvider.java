@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.lucky.around.meal.common.security.details.PrincipalDetailsService;
 import com.lucky.around.meal.common.security.record.JwtRecord;
+import com.lucky.around.meal.entity.Member;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -67,18 +68,25 @@ public class JwtProvider {
             .map(GrantedAuthority::getAuthority)
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("권한이 없는 사용자"));
-    String memberId = authResult.getName();
-    return generateJwt(authorities, memberId);
+    String memberName = authResult.getName();
+    return generateJwt(authorities, memberName);
+  }
+
+  // 재발급 시 액세스 토큰, 리프레시 토큰 발급
+  public JwtRecord getReissueToken(Member member) {
+    String authorities = member.getRole().getRole();
+    String memberName = member.getMemberName();
+    return generateJwt(authorities, memberName);
   }
 
   // 액세스 토큰, 리프레시 토큰이 담긴 JwtRecord 생성 메소드
-  public JwtRecord generateJwt(String authorities, String memberId) {
+  public JwtRecord generateJwt(String authorities, String memberName) {
     long now = (new Date()).getTime();
 
     // 액세스 토큰 생성
     String accessToken =
         Jwts.builder()
-            .subject(memberId)
+            .subject(memberName)
             .claim("authorities", authorities)
             .expiration(new Date(now + (accessTokenTTL * 1000)))
             .signWith(key)
@@ -86,7 +94,7 @@ public class JwtProvider {
     // 리프레시 토큰 생성
     String refreshToken =
         Jwts.builder()
-            .subject(memberId)
+            .subject(memberName)
             .expiration(new Date(now + (refreshTokenTTL * 1000)))
             .signWith(key)
             .compact();

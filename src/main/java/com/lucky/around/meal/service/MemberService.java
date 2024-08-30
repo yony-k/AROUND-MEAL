@@ -1,5 +1,8 @@
 package com.lucky.around.meal.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final JwtService jwtService;
 
   // 계정명 중복 검증
   public void isExistInDB(RegisterRecord registerRecord) {
@@ -55,5 +59,10 @@ public class MemberService {
             .findById(loginMember.getMemberId())
             .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
     return new MemberDto(newMember);
+  }
+
+  // 리프레시 토큰으로 액세스 토큰, 리프레시 토큰 재발급
+  public void reissueRefreshToken(HttpServletRequest request, HttpServletResponse response) {
+    jwtService.reissueRefreshToken(request, response);
   }
 }
