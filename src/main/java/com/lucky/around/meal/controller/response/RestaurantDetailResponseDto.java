@@ -13,5 +13,5 @@ public record RestaurantDetailResponseDto(
     String restaurantTel,
     double lon,
     double lat,
-    // double ratingAverage,
+    double ratingAverage,
     List<RatingResponseDto> rating) {}

@@ -9,6 +9,7 @@ import com.lucky.around.meal.entity.Member;
 import com.lucky.around.meal.entity.Rating;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.exception.CustomException;
+import com.lucky.around.meal.exception.exceptionType.MemberExceptionType;
 import com.lucky.around.meal.exception.exceptionType.RestaurantExceptionType;
 import com.lucky.around.meal.repository.MemberRepository;
 import com.lucky.around.meal.repository.RatingRepository;
@@ -27,11 +28,10 @@ public class RatingService {
   @Transactional
   public RatingResponseDto createRating(RatingRequestDto requestDto) {
 
-    // todo : 회원 예외처리
     Member member =
         memberRepository
             .findById(requestDto.memberId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
 
     Restaurant restaurant =
         restaurantRepository
@@ -50,6 +50,10 @@ public class RatingService {
 
     // 식당 평균 score 계산
     Double ratingAverage = ratingRepository.findAvgScoreByRestaurantId(requestDto.restaurantId());
+
+    restaurant.updateRatingAverage(ratingAverage); // 평균 변화
+
+    restaurantRepository.save(restaurant); // 저장
 
     return new RatingResponseDto(
         rating.getId(),
