@@ -5,10 +5,10 @@ import com.lucky.around.meal.entity.enums.MemberRole;
 
 public record RegisterRecord(String memberName, String password, String email) {
 
-  public Member toMember() {
+  public Member toMember(String password) {
     return Member.builder()
         .memberName(memberName())
-        .password(password())
+        .password(password)
         .email(email())
         .lat(0)
         .lon(0)
