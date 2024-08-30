@@ -65,7 +65,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       return getAuthenticationManager()
           .authenticate(
               // 회원가입 폼으로 들어온 정보가 특정 클래스로 래핑된다. null은 권한정보
-              new UsernamePasswordAuthenticationToken(login.memberId(), login.password(), null));
+              new UsernamePasswordAuthenticationToken(login.memberName(), login.password(), null));
 
     } catch (JsonParseException | JsonMappingException e) {
       // CustomAuthenticationFailureHandler 에서 예외가 처리되도록 하기 위해 모든 예외를 AuthenticationServiceException

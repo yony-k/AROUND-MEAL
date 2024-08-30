@@ -15,7 +15,12 @@ import lombok.*;
 @Table(name = "member")
 public class Member {
 
-  @Id private String memberId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long memberId;
+
+  @Column(nullable = false)
+  private String memberName;
 
   @Column(nullable = false)
   private String password;
