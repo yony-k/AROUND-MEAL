@@ -48,7 +48,8 @@ public class Restaurant {
       String doroDetailAddress,
       Category category,
       String restaurantTel,
-      Point location) {
+      Point location,
+      double ratingAverage) {
     this.id = id;
     this.restaurantName = restaurantName;
     this.dosi = dosi;
@@ -58,6 +59,11 @@ public class Restaurant {
     this.category = category;
     this.restaurantTel = restaurantTel;
     this.location = location;
+    this.ratingAverage = ratingAverage;
+  }
+
+  public void updateRatingAverage(double ratingAverage) {
+    this.ratingAverage = ratingAverage;
   }
 
   public String getJibunAddress() {

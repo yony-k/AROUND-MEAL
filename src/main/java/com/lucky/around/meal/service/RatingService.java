@@ -51,6 +51,10 @@ public class RatingService {
     // 식당 평균 score 계산
     Double ratingAverage = ratingRepository.findAvgScoreByRestaurantId(requestDto.restaurantId());
 
+    restaurant.updateRatingAverage(ratingAverage); // 평균 변화
+
+    restaurantRepository.save(restaurant); // 저장
+
     return new RatingResponseDto(
         rating.getId(),
         rating.getMember().getMemberId(),
