@@ -1,6 +1,7 @@
 package com.lucky.around.meal.datapipeline;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -14,11 +15,12 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RawDataFetchService {
+public class RawDataSaveService {
 
   private final WebClient.Builder webClientBuilder;
   private final RawRestaurantRepository rawRestaurantRepository;
   private final ObjectMapper objectMapper;
+  private boolean isInitialExecute = true; // 최초 실행 감지
 
   @Value("${API_BASE_URL}")
   private String BASE_URL;
@@ -43,13 +45,30 @@ public class RawDataFetchService {
   }
 
   public void saveRawData(String id, String jsonData) {
+    RawRestaurant existedRawRestaurant = rawRestaurantRepository.findById(id).orElse(null);
+
+    if (existedRawRestaurant == null) {
+      initialSaveRawData(id, jsonData);
+      return;
+    }
+    String newHash = HashUtil.generateSHA256Hash(jsonData);
+
+    if (!existedRawRestaurant.getHash().equals(newHash)) {
+      RawRestaurant rawRestaurant =
+          RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(newHash).build();
+      rawRestaurantRepository.save(rawRestaurant);
+    }
+  }
+
+  public void initialSaveRawData(String id, String jsonData) {
     String hash = HashUtil.generateSHA256Hash(jsonData);
+
     RawRestaurant rawRestaurant =
         RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(false).hash(hash).build();
     rawRestaurantRepository.save(rawRestaurant);
   }
 
-  //  @Scheduled(fixedRate = 900_000)
+  @Scheduled(fixedRate = 90_000)
   public void executeDataFetch() {
     try {
       int startIndex = 1;
@@ -64,10 +83,20 @@ public class RawDataFetchService {
         for (JsonNode rowNode : rowNodes) {
           String id = rowNode.path("MGTNO").asText("");
           String jsonData = rowNode.toString();
-          saveRawData(id, jsonData);
+
+          if (isInitialExecute) {
+            log.info("최초 api 호출입니다.");
+            initialSaveRawData(id, jsonData);
+          } else {
+            saveRawData(id, jsonData);
+          }
         }
 
         startIndex += PAGE_SIZE;
+
+        if (isInitialExecute) {
+          isInitialExecute = false;
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();

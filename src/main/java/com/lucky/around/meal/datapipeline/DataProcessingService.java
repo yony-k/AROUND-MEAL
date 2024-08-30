@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,7 +29,7 @@ public class DataProcessingService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  @Scheduled(fixedRate = 900_000)
+  //  @Scheduled(fixedRate = 900_000)
   public void processRawData() {
     try {
       int page = 0;
@@ -50,8 +49,6 @@ public class DataProcessingService {
                 .collect(Collectors.toList());
 
         restaurantRepository.saveAll(processedRestaurants);
-
-        // todo : 처리된 데이터의 isUpdated 플래그를 false로 업데이트
 
         page++;
       }
