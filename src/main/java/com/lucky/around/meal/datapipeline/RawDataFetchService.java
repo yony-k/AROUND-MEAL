@@ -1,7 +1,6 @@
 package com.lucky.around.meal.datapipeline;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -50,7 +49,7 @@ public class RawDataFetchService {
     rawRestaurantRepository.save(rawRestaurant);
   }
 
-  @Scheduled(fixedRate = 900_000)
+  //  @Scheduled(fixedRate = 900_000)
   public void executeDataFetch() {
     try {
       int startIndex = 1;
