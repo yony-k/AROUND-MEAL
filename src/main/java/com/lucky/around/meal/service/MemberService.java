@@ -23,7 +23,7 @@ public class MemberService {
     // DB에서 계정명 중복 검증
     boolean isExist = memberRepository.existsByMemberName(registerRecord.memberName());
     // 중복 존재할 시 예외 리턴
-    if (!isExist) {
+    if (isExist) {
       throw new CustomException(RegisterExceptionType.DUPLICATED_MEMBER_NAME);
     }
   }
