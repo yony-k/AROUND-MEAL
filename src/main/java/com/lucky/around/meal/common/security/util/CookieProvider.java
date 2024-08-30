@@ -66,10 +66,6 @@ public class CookieProvider {
 
   // 리프레시 토큰 담은 쿠키 재발급
   public Cookie reissueRefreshTokenCookie(Optional<Cookie> cookie, String refreshToken) {
-    if (cookie.isPresent()) {
-      return createRefreshTokenCookie(refreshToken);
-    } else {
-      throw new CustomException(SecurityExceptionType.COOKIE_NOT_FOUND);
-    }
+    return createRefreshTokenCookie(refreshToken);
   }
 }

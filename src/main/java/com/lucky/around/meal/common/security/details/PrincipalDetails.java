@@ -48,4 +48,8 @@ public class PrincipalDetails implements UserDetails {
   public double getLat() {
     return this.member.getLat();
   }
+
+  public Member getMember() {
+    return member;
+  }
 }

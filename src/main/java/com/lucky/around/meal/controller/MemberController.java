@@ -1,5 +1,8 @@
 package com.lucky.around.meal.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,5 +39,12 @@ public class MemberController {
       @AuthenticationPrincipal PrincipalDetails principalDetails) {
     MemberDto memberDto = memberService.getMemberInfo(principalDetails);
     return ResponseEntity.ok(memberDto);
+  }
+
+  @PostMapping("/refresh_token")
+  public ResponseEntity<String> reissueRefreshToken(
+      HttpServletRequest request, HttpServletResponse response) {
+    memberService.reissueRefreshToken(request, response);
+    return ResponseEntity.ok("토큰 재발급이 성공적으로 완료되었습니다.");
   }
 }

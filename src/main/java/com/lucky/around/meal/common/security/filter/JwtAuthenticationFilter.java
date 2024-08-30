@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lucky.around.meal.common.security.details.PrincipalDetails;
 import com.lucky.around.meal.common.security.handler.CustomAuthenticationFailureHandler;
 import com.lucky.around.meal.common.security.record.JwtRecord;
 import com.lucky.around.meal.common.security.redis.RefreshToken;
@@ -98,9 +99,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     response.setHeader(jwtProvider.accessTokenHeader, jwtProvider.prefix + jwtRecord.accessToken());
     // refreshToken은 쿠키에 저장
     response.addCookie(cookieProvider.createRefreshTokenCookie(jwtRecord.refreshToken()));
-    // redis에 refreshToken 저장
+    // redis에 refreshToken 저장, memberId는 String으로 변환 후 저장
+    long memberId = ((PrincipalDetails) authResult.getPrincipal()).getMemberId();
     refreshTokenRepository.save(
-        new RefreshToken(refreshTokenPrefix + jwtRecord.refreshToken(), authResult.getName()));
+        new RefreshToken(refreshTokenPrefix + jwtRecord.refreshToken(), String.valueOf(memberId)));
 
     response.setStatus(HttpStatus.OK.value());
     response.setContentType("text/plain; charset=UTF-8");
