@@ -26,11 +26,11 @@ public class RatingService {
   private final RestaurantRepository restaurantRepository;
 
   @Transactional
-  public RatingResponseDto createRating(RatingRequestDto requestDto) {
+  public RatingResponseDto createRating(Long memberId, RatingRequestDto requestDto) {
 
     Member member =
         memberRepository
-            .findById(requestDto.memberId())
+            .findById(memberId)
             .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
 
     Restaurant restaurant =

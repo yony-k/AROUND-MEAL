@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Range;
 
 public record RatingRequestDto(
-    Long memberId,
     String restaurantId,
     @Range(min = 0, max = 5, message = "0~5 사이의 숫자만 가능합니다.") Integer score,
     @NotBlank(message = "필수 입력값 입니다.")
