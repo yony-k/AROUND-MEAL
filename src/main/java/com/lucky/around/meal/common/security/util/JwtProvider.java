@@ -13,12 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.lucky.around.meal.common.security.details.PrincipalDetailsService;
 import com.lucky.around.meal.common.security.record.JwtRecord;
-import com.lucky.around.meal.exception.CustomException;
-import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -97,40 +94,23 @@ public class JwtProvider {
     return new JwtRecord(accessToken, refreshToken);
   }
 
-  // 액세스 토큰 검증 및 정보 리턴
-  public String validateToken(HttpServletRequest request) {
+  // 액세스 토큰 가져오기
+  public String getAccessToken(HttpServletRequest request) {
     // 헤더에서 토큰 가져오기
     String accessToken = request.getHeader(accessTokenHeader);
-    // 헤더에 토큰 값이 없거나 지정된 프리픽스로 시작하는 문자열이 아니면 검증 실패
-    if (!StringUtils.hasText(accessToken) || !accessToken.startsWith("Bearer ")) {
-      return null;
-    } else {
-      return accessToken;
-    }
+    return accessToken;
   }
 
   // 인증 객체 리턴
   public Authentication getAuthentication(String token) {
-
+    // accessToken에서 prefix 제거
     String accessToken = token.substring(prefix.length());
-
-    try {
-      // 액세스 토큰 해석하여 정보 가져오기
-      Claims claims =
-          Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken).getPayload();
-      // 액세스 토큰에 담긴 memberId로 PrincipalDetails 객체 가져오기
-      UserDetails userDetails = principalDetailsService.loadUserByUsername(claims.getSubject());
-      // 가져온 객체를 이용해 인증객체 만들기
-      return new UsernamePasswordAuthenticationToken(
-          userDetails, null, userDetails.getAuthorities());
-    } catch (SecurityException | MalformedJwtException e) {
-      throw new CustomException(SecurityExceptionType.INVALID_JWT_TOKEN);
-    } catch (ExpiredJwtException e) {
-      throw new CustomException(SecurityExceptionType.EXPIRED_JWT_TOKEN);
-    } catch (UnsupportedJwtException e) {
-      throw new CustomException(SecurityExceptionType.UNSUPPORTED_JWT_TOKEN);
-    } catch (IllegalArgumentException e) {
-      throw new CustomException(SecurityExceptionType.EMPTY_JWT_CLAIMS);
-    }
+    // 액세스 토큰 해석하여 정보 가져오기
+    Claims claims =
+        Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken).getPayload();
+    // 액세스 토큰에 담긴 memberId로 PrincipalDetails 객체 가져오기
+    UserDetails userDetails = principalDetailsService.loadUserByUsername(claims.getSubject());
+    // 가져온 객체를 이용해 인증객체 만들기
+    return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 }

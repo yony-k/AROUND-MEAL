@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
@@ -85,7 +90,43 @@ public class CustomExceptionHandler {
   // Spring Security 인증, 인가 관련 예외 처리
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage());
+  }
+
+  // jwt 형식 오류
+  @ExceptionHandler(MalformedJwtException.class)
+  public ResponseEntity<String> handleMalformedJwtException(MalformedJwtException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(SecurityExceptionType.INVALID_JWT_TOKEN.getMessage());
+  }
+
+  // jwt 형식 오류
+  @ExceptionHandler(SecurityException.class)
+  public ResponseEntity<String> handleSecurityException(SecurityException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(SecurityExceptionType.INVALID_JWT_TOKEN.getMessage());
+  }
+
+  // jwt 서명 오류
+  @ExceptionHandler(ExpiredJwtException.class)
+  public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(SecurityExceptionType.EXPIRED_JWT_TOKEN.getMessage());
+  }
+
+  // 지원되지 않는 jwt
+  @ExceptionHandler(UnsupportedJwtException.class)
+  public ResponseEntity<String> handleUnsupportedJwtException(UnsupportedJwtException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(SecurityExceptionType.UNSUPPORTED_JWT_TOKEN.getMessage());
+  }
+
+  // jwt 클레임 비어있음 오류
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(SecurityExceptionType.EMPTY_JWT_CLAIMS.getMessage());
   }
 
   // Spring Security 권한 관련 예외 처리
