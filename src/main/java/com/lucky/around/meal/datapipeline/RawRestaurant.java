@@ -31,7 +31,7 @@ public class RawRestaurant {
     this.isUpdated = isUpdated;
   }
 
-  public void cancelUpdated() {
-    this.isUpdated = false;
+  public void setUpdated(boolean flag) {
+    this.isUpdated = flag;
   }
 }

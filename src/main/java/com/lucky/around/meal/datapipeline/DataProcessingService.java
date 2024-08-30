@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +30,8 @@ public class DataProcessingService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  //  @Scheduled(fixedRate = 90_000)
-  public void processRawData() {
+  @Transactional
+  public void dataProcessing() {
     try {
       int page = 0;
 
@@ -46,11 +47,11 @@ public class DataProcessingService {
 
         for (RawRestaurant rawRestaurant : rawRestaurants) {
           if (rawRestaurant.isUpdated()) {
-            log.info("변경된 레스토랑은 : " + rawRestaurant.getJsonData());
+            log.info("변경된 맛집 : " + rawRestaurant.getJsonData());
             Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
             if (processedRestaurant != null) {
               restaurantRepository.save(processedRestaurant);
-              rawRestaurant.cancelUpdated();
+              rawRestaurant.setUpdated(false);
               rawRestaurantRepository.save(rawRestaurant);
             }
           }
@@ -59,7 +60,7 @@ public class DataProcessingService {
         page++;
       }
     } catch (Exception e) {
-      log.error("Error during data processing", e);
+      log.error("[processRawData] error - ", e);
     }
   }
 
@@ -98,7 +99,7 @@ public class DataProcessingService {
           .lat(lat)
           .build();
     } catch (Exception e) {
-      log.error("Error converting RawRestaurant to ProcessedRestaurant", e);
+      log.error("[convertToProcessedRestaurant] error - ", e);
       return null; // 혹은 예외 처리 로직을 추가
     }
   }

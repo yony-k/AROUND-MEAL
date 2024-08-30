@@ -1,9 +1,15 @@
 package com.lucky.around.meal.datapipeline;
 
+import java.io.IOException;
+
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +27,6 @@ public class RawDataSaveService {
   private final RawRestaurantRepository rawRestaurantRepository;
   private final DataProcessingService dataProcessingService;
   private final ObjectMapper objectMapper;
-  private boolean isInitialExecute = true; // 최초 실행 감지
 
   @Value("${API_BASE_URL}")
   private String BASE_URL;
@@ -38,44 +43,26 @@ public class RawDataSaveService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  public Mono<String> fetchData(int startIndex, int endIndex) {
-    String uri =
-        String.format("/%s/%s/%s/%s/%s", KEY, FORMAT_TYPE, SERVICE_NAME, startIndex, endIndex);
-    WebClient webClient = webClientBuilder.baseUrl(BASE_URL).build();
-    return webClient.get().uri(uri).retrieve().bodyToMono(String.class);
+  private final int MAX_INDEX = 499; // API 어디까지 부를지 결정 (원래는 59만 정도)
+
+  @PostConstruct
+  public void init() { // 애플리케이션 시작 후 1번 실행
+    log.info("[init] 최초 API 호출입니다.");
+    processRawDataSave();
   }
 
-  public void saveRawData(String id, String jsonData) {
-    RawRestaurant existedRawRestaurant = rawRestaurantRepository.findById(id).orElse(null);
-
-    if (existedRawRestaurant == null) {
-      initialSaveRawData(id, jsonData);
-      return;
-    }
-
-    String newHash = HashUtil.generateSHA256Hash(jsonData);
-
-    if (!existedRawRestaurant.getHash().equals(newHash)) {
-      RawRestaurant rawRestaurant =
-          RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(newHash).build();
-      rawRestaurantRepository.save(rawRestaurant);
-    }
+  @Transactional
+  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
+  //  @Scheduled(cron = "0 */3 * * * *") // 3분마다 실행
+  public synchronized void executeRawDataRead() {
+    log.info("[scheduler] API 재호출입니다.");
+    processRawDataSave();
   }
 
-  public void initialSaveRawData(String id, String jsonData) {
-    String hash = HashUtil.generateSHA256Hash(jsonData);
-
-    RawRestaurant rawRestaurant =
-        RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(hash).build();
-    rawRestaurantRepository.save(rawRestaurant);
-  }
-
-  @Scheduled(fixedRate = 90_000)
-  public void executeDataFetch() {
+  public void processRawDataSave() {
     try {
       int startIndex = 1;
-
-      while (startIndex < 499) {
+      while (startIndex < MAX_INDEX) {
         int endIndex = startIndex + PAGE_SIZE - 1;
         String responseData = fetchData(startIndex, endIndex).block();
 
@@ -86,24 +73,49 @@ public class RawDataSaveService {
           String id = rowNode.path("MGTNO").asText("");
           String jsonData = rowNode.toString();
 
-          if (isInitialExecute) {
-            log.info("최초 api 호출입니다.");
-            initialSaveRawData(id, jsonData);
-          } else {
-            saveRawData(id, jsonData);
-          }
+          saveRawData(id, jsonData);
         }
 
         startIndex += PAGE_SIZE;
-
-        if (isInitialExecute) {
-          isInitialExecute = false;
-        }
       }
 
-      dataProcessingService.processRawData();
+      dataProcessingService.dataProcessing(); // 데이터 과정 단계로 넘어가기
+    } catch (IOException e) {
+      log.error("[processRawDataSave] I/O error - ", e);
+    } catch (WebClientResponseException e) {
+      log.error(
+          "[processRawDataSave] API call error - Status: {}, Body: {}",
+          e.getStatusCode(),
+          e.getResponseBodyAsString(),
+          e);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("[processRawDataSave] Unexpected error - ", e);
+    }
+  }
+
+  public Mono<String> fetchData(int startIndex, int endIndex) {
+    String uri =
+        String.format("/%s/%s/%s/%s/%s", KEY, FORMAT_TYPE, SERVICE_NAME, startIndex, endIndex);
+    return webClientBuilder
+        .baseUrl(BASE_URL)
+        .build()
+        .get()
+        .uri(uri)
+        .retrieve()
+        .bodyToMono(String.class);
+  }
+
+  public void saveRawData(String id, String jsonData) {
+    RawRestaurant existedRawRestaurant = rawRestaurantRepository.findById(id).orElse(null);
+
+    String newHash = HashUtil.generateSHA256Hash(jsonData);
+
+    if (existedRawRestaurant == null || !existedRawRestaurant.getHash().equals(newHash)) {
+      RawRestaurant rawRestaurant =
+          RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(newHash).build();
+      rawRestaurantRepository.save(rawRestaurant);
+      log.info(
+          "[saveRawData] Saved data - id : {}, new entry: {}", id, existedRawRestaurant == null);
     }
   }
 }
