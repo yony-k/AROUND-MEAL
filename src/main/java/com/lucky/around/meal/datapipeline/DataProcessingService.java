@@ -83,9 +83,6 @@ public class DataProcessingService {
       String[] doroAddresses = splitAddress(doroAddress);
       String doroDetailAddress = doroAddresses[2];
 
-      Double lon = parseDouble(rootNode.path("X").asText());
-      Double lat = parseDouble(rootNode.path("Y").asText());
-
       return Restaurant.builder()
           .id(id)
           .restaurantName(restaurantName)
@@ -95,8 +92,6 @@ public class DataProcessingService {
           .doroDetailAddress(doroDetailAddress)
           .dosi(dosi)
           .sigungu(sigungu)
-          .lon(lon)
-          .lat(lat)
           .build();
     } catch (Exception e) {
       log.error("[convertToProcessedRestaurant] error - ", e);
@@ -109,13 +104,5 @@ public class DataProcessingService {
       return new String[] {"", "", ""};
     }
     return address.split(" ", 3);
-  }
-
-  private Double parseDouble(String value) {
-    try {
-      return Double.parseDouble(value);
-    } catch (NumberFormatException e) {
-      return 0.0;
-    }
   }
 }

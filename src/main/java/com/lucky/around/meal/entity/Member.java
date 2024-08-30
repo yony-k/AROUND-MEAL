@@ -20,8 +20,20 @@ public class Member {
   private Long memberId;
 
   @Column(nullable = false)
+  private String memberName;
+
+  @Column(nullable = false)
   private String password;
+
+  @Column(nullable = false)
+  private String email;
 
   @Enumerated(EnumType.STRING)
   private MemberRole role;
+
+  @Column(nullable = true)
+  private long lat;
+
+  @Column(nullable = true)
+  private long lon;
 }
