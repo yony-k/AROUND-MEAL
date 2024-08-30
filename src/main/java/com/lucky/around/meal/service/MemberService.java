@@ -49,7 +49,7 @@ public class MemberService {
     Member newMember =
         memberRepository
             .findById(loginMember.getMemberId())
-            .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
     return new MemberDto(newMember);
   }
 }
