@@ -43,6 +43,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     String accessToken = jwtProvider.validateToken(request);
     if (accessToken != null) {
       try {
+        // accessToken을 사용해서 인증객체 등록
         SecurityContextHolder.getContext()
             .setAuthentication(jwtProvider.getAuthentication(accessToken));
         filterChain.doFilter(request, response);

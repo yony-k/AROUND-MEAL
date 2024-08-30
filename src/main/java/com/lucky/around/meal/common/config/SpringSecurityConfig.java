@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -123,11 +124,17 @@ public class SpringSecurityConfig {
         .authorizeHttpRequests(
             authz ->
                 authz
-                    .requestMatchers(
-                        "/api/members", "/api/members/login", "/api/members/refresh_token")
-                    .permitAll()
+                    // 관리자
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
+                    // 회원가입, 사용자 정보 요청
+                    .requestMatchers(HttpMethod.GET, "/api/members")
+                    .authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/members")
+                    .permitAll()
+                    // 로그인, 액세스 토큰 재발급
+                    .requestMatchers("/api/members/login", "/api/members/refresh_token")
+                    .permitAll()
                     // 이외 모든 요청 인증 필요
                     .anyRequest()
                     .permitAll())

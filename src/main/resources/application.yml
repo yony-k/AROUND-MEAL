@@ -25,7 +25,6 @@ spring:
 
   excluded:
     path-list:
-      /api/members,
       /api/members/login,
       /api/members/refresh_token
 

@@ -16,7 +16,9 @@ public enum SecurityExceptionType implements ExceptionType {
       HttpStatus.UNAUTHORIZED, "서버에서 요청을 처리하는 도중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "인증 정보가 잘못되었거나 유효하지 않습니다. 아이디와 비밀번호를 확인해 주세요."),
   SERVER_ERROR(HttpStatus.UNAUTHORIZED, "서버에서 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."),
-  USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "해당하는 아이디의 회원이 없습니다."),
+
+  // 404 Not Found
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 아이디의 회원이 없습니다."),
 
   // 401 Unautorized
   // JwtAuthorizationFilter(jwt 토큰 검증 때 사용되는 인증필터) 오류
