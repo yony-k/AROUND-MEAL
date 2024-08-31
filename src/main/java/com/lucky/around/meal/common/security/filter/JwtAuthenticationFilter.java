@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,7 +21,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucky.around.meal.common.security.details.PrincipalDetails;
-import com.lucky.around.meal.common.security.handler.CustomAuthenticationFailureHandler;
 import com.lucky.around.meal.common.security.record.JwtRecord;
 import com.lucky.around.meal.common.security.redis.RefreshToken;
 import com.lucky.around.meal.common.security.redis.RefreshTokenRepository;
@@ -42,8 +42,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   private final CookieProvider cookieProvider;
   // redis 리포지토리
   private final RefreshTokenRepository refreshTokenRepository;
-  // 예외 처리 핸들러
-  private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
   // refreshToken 프리픽스
   @Value("${spring.data.redis.prefix}")
@@ -67,20 +65,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
           .authenticate(
               // 회원가입 폼으로 들어온 정보가 특정 클래스로 래핑된다. null은 권한정보
               new UsernamePasswordAuthenticationToken(login.memberName(), login.password(), null));
-
-    } catch (JsonParseException | JsonMappingException e) {
-      // CustomAuthenticationFailureHandler 에서 예외가 처리되도록 하기 위해 모든 예외를 AuthenticationServiceException
-      // 감쌈
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.INVALID_JSON_REQUEST.getMessage(), e);
-    } catch (IOException e) {
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.IO_ERROR_PROCESSING_REQUEST.getMessage(), e);
-    } catch (AuthenticationException e) {
-      throw new AuthenticationServiceException(
-          SecurityExceptionType.INVALID_CREDENTIALS.getMessage(), e);
     } catch (Exception e) {
-      throw new AuthenticationServiceException(SecurityExceptionType.SERVER_ERROR.getMessage(), e);
+      // 예외를 잡아서 unsuccessfulAuthentication 로 넘김
+      throw new AuthenticationServiceException(e.getMessage(), e);
     }
   }
 
@@ -94,20 +81,34 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       throws IOException, ServletException {
 
     // 인증 객체를 이용해 jwt 생성
-    JwtRecord jwtRecord = jwtProvider.getLoginToken(authResult);
-    // accessToken은 헤더에 저장
+    JwtRecord jwtRecord = createJwtTokens(authResult);
+
+    // 응답에 토큰 추가
+    addTokensToResponse(response, jwtRecord);
+
+    // redis에 refreshToken 추가
+    storeRefreshToken(authResult, jwtRecord);
+
+    log.info("로그인 성공 : 아이디({})", authResult.getName());
+    sendResponse("로그인 성공", HttpStatus.OK, response);
+  }
+
+  // 인증 객체를 이용해 jwt 생성
+  private JwtRecord createJwtTokens(Authentication authResult) {
+    return jwtProvider.getLoginToken(authResult);
+  }
+
+  // accessToken은 헤더에 저장, refreshToken은 쿠키에 저장
+  private void addTokensToResponse(HttpServletResponse response, JwtRecord jwtRecord) {
     response.setHeader(jwtProvider.accessTokenHeader, jwtProvider.prefix + jwtRecord.accessToken());
-    // refreshToken은 쿠키에 저장
     response.addCookie(cookieProvider.createRefreshTokenCookie(jwtRecord.refreshToken()));
-    // redis에 refreshToken 저장, memberId는 String으로 변환 후 저장
+  }
+
+  // redis에 refreshToken 저장, memberId는 String으로 변환 후 저장
+  private void storeRefreshToken(Authentication authResult, JwtRecord jwtRecord) {
     long memberId = ((PrincipalDetails) authResult.getPrincipal()).getMemberId();
     refreshTokenRepository.save(
         new RefreshToken(refreshTokenPrefix + jwtRecord.refreshToken(), String.valueOf(memberId)));
-
-    response.setStatus(HttpStatus.OK.value());
-    response.setContentType("text/plain; charset=UTF-8");
-    response.getWriter().write("로그인 성공");
-    response.getWriter().flush();
   }
 
   // 로그인 인증 실패시 실행되는 메소드
@@ -116,6 +117,40 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   protected void unsuccessfulAuthentication(
       HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
       throws IOException, ServletException {
-    customAuthenticationFailureHandler.onAuthenticationFailure(request, response, failed);
+
+    // 예외 종류 확인
+    Throwable e = failed.getCause();
+    String message = getExceptionMessage(e);
+
+    // 클라이언트에게 응답
+    log.error("로그인 실패 : {}", message);
+    sendResponse(message, HttpStatus.UNAUTHORIZED, response);
+  }
+
+  // 예외 종류 확인해서 적절한 메세지 리턴
+  private String getExceptionMessage(Throwable e) {
+    String message = "";
+    if (e instanceof JsonParseException j) {
+      message = SecurityExceptionType.INVALID_JSON_REQUEST.getMessage();
+    } else if (e instanceof JsonMappingException) {
+      message = SecurityExceptionType.INVALID_JSON_REQUEST.getMessage();
+    } else if (e instanceof IOException) {
+      message = SecurityExceptionType.IO_ERROR_PROCESSING_REQUEST.getMessage();
+    } else if (e instanceof AuthenticationException) {
+      message = SecurityExceptionType.INVALID_CREDENTIALS.getMessage();
+    } else {
+      message = SecurityExceptionType.SERVER_ERROR.getMessage();
+    }
+    return message;
+  }
+
+  // 클라이언트에게 응답 보내기
+  private void sendResponse(String message, HttpStatus httpStatus, HttpServletResponse response)
+      throws IOException {
+    response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+    response.setCharacterEncoding("UTF-8");
+    response.setStatus(httpStatus.value());
+    response.getWriter().write(message);
+    response.getWriter().flush();
   }
 }
