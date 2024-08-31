@@ -99,10 +99,10 @@ public class MemberServiceTest {
     verify(memberRepository)
         .save(
             argThat(
-                member ->
-                    member.getMemberName().equals(member.getMemberName())
-                        && member.getPassword().equals(member.getPassword())
-                        && member.getEmail().equals(member.getEmail())));
+                m ->
+                    m.getMemberName().equals(member.getMemberName())
+                        && m.getPassword().equals(member.getPassword())
+                        && m.getEmail().equals(member.getEmail())));
   }
 
   @Test

@@ -105,8 +105,7 @@ public class JwtProvider {
   // 액세스 토큰 가져오기
   public String getAccessToken(HttpServletRequest request) {
     // 헤더에서 토큰 가져오기
-    String accessToken = request.getHeader(accessTokenHeader);
-    return accessToken;
+    return request.getHeader(accessTokenHeader);
   }
 
   // 인증 객체 리턴
