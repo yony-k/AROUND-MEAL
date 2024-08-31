@@ -34,4 +34,10 @@ public class LocationController {
     service.updateStaticLocation(request);
     return ResponseEntity.ok().build();
   }
+
+  @GetMapping("/static")
+  public ResponseEntity<StaticLocationResponseDto> getStaticLocation() {
+    StaticLocationResponseDto location = service.getStaticLocation();
+    return ResponseEntity.ok(location);
+  }
 }
