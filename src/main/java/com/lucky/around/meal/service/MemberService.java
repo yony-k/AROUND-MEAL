@@ -50,13 +50,10 @@ public class MemberService {
   // 사용자 정보 반환
   public MemberDto getMemberInfo(PrincipalDetails principalDetails) {
 
-    // 인증객체에서 Member 객체 가져오기
-    Member loginMember = principalDetails.getMember();
-
-    // 인증객체 이용해서 DB에서 Member 객체 가져오기(최신정보)
+    // 인증객체에서 memberId 가져와서 DB에서 Member 객체 가져오기(최신정보)
     Member newMember =
         memberRepository
-            .findById(loginMember.getMemberId())
+            .findById(principalDetails.getMemberId())
             .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
     return new MemberDto(newMember);
   }
