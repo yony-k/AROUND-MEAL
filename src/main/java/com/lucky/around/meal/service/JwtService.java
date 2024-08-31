@@ -53,7 +53,7 @@ public class JwtService {
     Member findMember = getMember(refreshToken.get().getMemberId());
 
     // 토큰 재발급 후 헤더, 쿠키, redis에 토큰 저장
-    reissueToken(findMember,response);
+    reissueToken(findMember, response);
   }
 
   // 리퀘스트에서 refreshToken 빼오기
@@ -66,7 +66,7 @@ public class JwtService {
   // redis에서 쿠키 값을 이용해 refreshToken 가져오기
   private Optional<RefreshToken> getRefreshToken(Optional<Cookie> findCookie) {
     Optional<RefreshToken> refreshToken =
-            refreshTokenRepository.findById(refreshTokenPrefix + findCookie.get().getValue());
+        refreshTokenRepository.findById(refreshTokenPrefix + findCookie.get().getValue());
     if (!refreshToken.isPresent())
       throw new CustomException(SecurityExceptionType.REFRESHTOKEN_NOT_FOUND);
     return refreshToken;
@@ -79,9 +79,9 @@ public class JwtService {
 
     // memberRepository 에서 사용자 정보 가져오기
     Member findMember =
-            memberRepository
-                    .findById(savedMemberId)
-                    .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
+        memberRepository
+            .findById(savedMemberId)
+            .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
     return findMember;
   }
 
@@ -92,12 +92,13 @@ public class JwtService {
 
     // accessToken은 헤더에 저장
     response.setHeader(
-            jwtProvider.accessTokenHeader, jwtProvider.prefix + reissueToken.accessToken());
+        jwtProvider.accessTokenHeader, jwtProvider.prefix + reissueToken.accessToken());
     // refreshToken은 쿠키에 저장
     response.addCookie(cookieProvider.createRefreshTokenCookie(reissueToken.refreshToken()));
     // redis에 refreshToken 저장, memberId는 String으로 변환 후 저장
     refreshTokenRepository.save(
-            new RefreshToken(
-                    refreshTokenPrefix + reissueToken.refreshToken(), String.valueOf(findMember.getMemberId())));
+        new RefreshToken(
+            refreshTokenPrefix + reissueToken.refreshToken(),
+            String.valueOf(findMember.getMemberId())));
   }
 }

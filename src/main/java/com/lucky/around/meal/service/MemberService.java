@@ -54,7 +54,7 @@ public class MemberService {
     Member newMember =
         memberRepository
             .findById(principalDetails.getMemberId())
-            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
     return new MemberDto(newMember);
   }
 
