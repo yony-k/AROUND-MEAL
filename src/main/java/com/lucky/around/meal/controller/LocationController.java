@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.lucky.around.meal.controller.request.*;
+import com.lucky.around.meal.controller.request.StaticLocationRequestDto;
 import com.lucky.around.meal.controller.response.*;
 import com.lucky.around.meal.service.*;
 
@@ -26,5 +27,11 @@ public class LocationController {
   public ResponseEntity<LocationResponseDto> getMemberLocation() {
     LocationResponseDto location = service.getMemberLocationToTrans();
     return ResponseEntity.ok(location);
+  }
+
+  @PatchMapping("/static")
+  public ResponseEntity<Void> updateStaticLocation(@RequestBody StaticLocationRequestDto request) {
+    service.updateStaticLocation(request);
+    return ResponseEntity.ok().build();
   }
 }
