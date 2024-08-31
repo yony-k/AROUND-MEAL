@@ -130,7 +130,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   // 예외 종류 확인해서 적절한 메세지 리턴
   private String getExceptionMessage(Throwable e) {
     String message = "";
-    if (e instanceof JsonParseException j) {
+    if (e instanceof JsonParseException) {
       message = SecurityExceptionType.INVALID_JSON_REQUEST.getMessage();
     } else if (e instanceof JsonMappingException) {
       message = SecurityExceptionType.INVALID_JSON_REQUEST.getMessage();
