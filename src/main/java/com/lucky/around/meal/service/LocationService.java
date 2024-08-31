@@ -43,6 +43,12 @@ public class LocationService {
     member.updateLocation(request.lon(), request.lat());
   }
 
+  // 회원의 정적인 위치 정보 조회
+  public StaticLocationResponseDto getStaticLocation() {
+    Member member = findMemberById(getCurrentMemberId());
+    return new StaticLocationResponseDto(member.getLat(), member.getLon());
+  }
+
   // 회원 실시간 위치 정보 DTO 변환
   public LocationResponseDto getMemberLocationToTrans() {
     Point redisPoint = getMemberLocation();
