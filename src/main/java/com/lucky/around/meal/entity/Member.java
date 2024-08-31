@@ -36,4 +36,9 @@ public class Member {
 
   @Column(nullable = true)
   private double lon;
+
+  public void updateLocation(double lat, double lon) {
+    this.lat = lat;
+    this.lon = lon;
+  }
 }
