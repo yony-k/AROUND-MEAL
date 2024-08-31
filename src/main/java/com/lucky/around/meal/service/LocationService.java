@@ -24,35 +24,30 @@ public class LocationService {
   private final RedisRepository redis;
   private final MemberRepository memberRepository;
 
-  // Redis에 실시간 위치 정보 저장
   public void saveMemberLocation(MemberLocationRequestDto request) {
     String key = generateRedisKey(getCurrentMemberId());
-    redis.saveRealTimeLocation(key, request.lat(), request.lon(), getCurrentMemberId());
+    redis.saveRealTimeLocation(key, request.lon(), request.lat(), getCurrentMemberId());
   }
 
-  // Redis에서 실시간 위치 정보 조회
   public Point getMemberLocation() {
     String key = generateRedisKey(getCurrentMemberId());
     return redis.getRealTimeLocation(key, getCurrentMemberId());
   }
 
-  // 회원의 정적인 위치 정보 업데이트
   @Transactional
   public void updateStaticLocation(StaticLocationRequestDto request) {
     Member member = findMemberById(getCurrentMemberId());
     member.updateLocation(request.lon(), request.lat());
   }
 
-  // 회원의 정적인 위치 정보 조회
   public StaticLocationResponseDto getStaticLocation() {
     Member member = findMemberById(getCurrentMemberId());
-    return new StaticLocationResponseDto(member.getLat(), member.getLon());
+    return new StaticLocationResponseDto(member.getLon(), member.getLat());
   }
 
-  // 회원 실시간 위치 정보 DTO 변환
   public LocationResponseDto getMemberLocationToTrans() {
     Point redisPoint = getMemberLocation();
-    return new LocationResponseDto(redisPoint.getY(), redisPoint.getX());
+    return new LocationResponseDto(redisPoint.getX(), redisPoint.getY());
   }
 
   private String generateRedisKey(Long memberId) {

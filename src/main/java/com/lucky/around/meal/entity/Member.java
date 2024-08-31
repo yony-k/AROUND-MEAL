@@ -32,13 +32,13 @@ public class Member {
   private MemberRole role;
 
   @Column(nullable = true)
-  private double lat;
-
-  @Column(nullable = true)
   private double lon;
 
-  public void updateLocation(double lat, double lon) {
-    this.lat = lat;
+  @Column(nullable = true)
+  private double lat;
+
+  public void updateLocation(double lon, double lat) {
     this.lon = lon;
+    this.lat = lat;
   }
 }
