@@ -1,5 +1,8 @@
 package com.lucky.around.meal.entity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import jakarta.persistence.*;
 
 import com.lucky.around.meal.entity.enums.MemberRole;
@@ -38,7 +41,13 @@ public class Member {
   private double lat;
 
   public void updateLocation(double lon, double lat) {
-    this.lon = lon;
-    this.lat = lat;
+    this.lon = round(lon, 6);
+    this.lat = round(lat, 6);
+  }
+
+  private double round(double value, int decimalPlaces) {
+    BigDecimal bd = new BigDecimal(value);
+    bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
+    return bd.doubleValue();
   }
 }
