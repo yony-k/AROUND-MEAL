@@ -1,5 +1,7 @@
 package com.lucky.around.meal.common.redis;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -20,17 +22,17 @@ public class RedisRepository {
 
   private final StringRedisTemplate redisTemplate;
 
-  public void saveRealTimeLocation(String key, double lat, double lon, Long memberId) {
+  public void saveRealTimeLocation(String key, double lon, double lat, Long memberId) {
     GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
-    geoOps.add(key, new Point(lat, lon), String.valueOf(memberId));
+    geoOps.add(key, new Point(round(lon, 6), round(lat, 6)), String.valueOf(memberId));
     redisTemplate.expire(key, 15, TimeUnit.MINUTES);
   }
 
   public Point getRealTimeLocation(String key, Long memberId) {
     GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
     List<Point> positions = geoOps.position(key, String.valueOf(memberId));
-
-    return getFirstPositionOrThrow(positions);
+    Point point = getFirstPositionOrThrow(positions);
+    return new Point(round(point.getX(), 6), round(point.getY(), 6));
   }
 
   private Point getFirstPositionOrThrow(List<Point> positions) {
@@ -38,5 +40,11 @@ public class RedisRepository {
         .filter(list -> !list.isEmpty())
         .map(list -> list.get(0))
         .orElseThrow(() -> new CustomException(MemberExceptionType.REALTIME_LOCATION_NOT_FOUND));
+  }
+
+  private double round(double value, int decimalPlaces) {
+    BigDecimal bd = new BigDecimal(value);
+    bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
+    return bd.doubleValue();
   }
 }
