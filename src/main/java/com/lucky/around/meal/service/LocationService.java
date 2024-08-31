@@ -4,12 +4,15 @@ import org.springframework.data.geo.Point;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lucky.around.meal.common.redis.RedisRepository;
 import com.lucky.around.meal.common.security.details.PrincipalDetails;
 import com.lucky.around.meal.controller.request.*;
 import com.lucky.around.meal.controller.response.*;
 import com.lucky.around.meal.entity.*;
+import com.lucky.around.meal.exception.CustomException;
+import com.lucky.around.meal.exception.exceptionType.MemberExceptionType;
 import com.lucky.around.meal.repository.*;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,13 @@ public class LocationService {
     return redis.getRealTimeLocation(key, getCurrentMemberId());
   }
 
+  // 회원의 정적인 위치 정보 업데이트
+  @Transactional
+  public void updateStaticLocation(StaticLocationRequestDto request) {
+    Member member = findMemberById(getCurrentMemberId());
+    member.updateLocation(request.lon(), request.lat());
+  }
+
   // 회원 실시간 위치 정보 DTO 변환
   public LocationResponseDto getMemberLocationToTrans() {
     Point redisPoint = getMemberLocation();
@@ -41,6 +51,12 @@ public class LocationService {
 
   private String generateRedisKey(Long memberId) {
     return "location:" + memberId;
+  }
+
+  private Member findMemberById(Long memberId) {
+    return memberRepository
+        .findById(memberId)
+        .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
   }
 
   private Long getCurrentMemberId() {
