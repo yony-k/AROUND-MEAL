@@ -66,7 +66,7 @@ public class MemberServiceTest {
 
   @Test
   @DisplayName("계정 중복 테스트 실패 케이스")
-  public void isExistInDBFailTest() {
+  public void isExistInDBFailureTest() {
     // given
     // DB에 중복체크할 때 false(중복 있음) 반환
     when(memberRepository.existsByMemberName(registerRecord.memberName())).thenReturn(true);
@@ -127,7 +127,7 @@ public class MemberServiceTest {
 
   @Test
   @DisplayName("사용자 정보 반환 실패 케이스")
-  public void getMemberFailInfo() {
+  public void getMemberFailureInfo() {
     // given
     PrincipalDetails principalDetails = new PrincipalDetails(member);
     // DB에서 Member 객체를 받아오지 못했을 떄

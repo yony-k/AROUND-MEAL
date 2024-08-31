@@ -63,9 +63,4 @@ public class CookieProvider {
         .filter(cookie -> cookieName.equals(cookie.getName()))
         .findFirst();
   }
-
-  // 리프레시 토큰 담은 쿠키 재발급
-  public Cookie reissueRefreshTokenCookie(Optional<Cookie> cookie, String refreshToken) {
-    return createRefreshTokenCookie(refreshToken);
-  }
 }

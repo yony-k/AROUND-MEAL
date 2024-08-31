@@ -90,8 +90,15 @@ public class CustomExceptionHandler {
   // Spring Security 인증, 인가 관련 예외 처리
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body(SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage());
+    String message = ex.getMessage();
+    if (message.equals("Full authentication is required to access this resource")) {
+      // 인증 객체가 없을 때
+      message = SecurityExceptionType.REQUIRED_AUTHENTICATION.getMessage();
+    } else {
+      // 로그인에 실패했을 때
+      message = SecurityExceptionType.INVALID_CREDENTIALS.getMessage();
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
   }
 
   // jwt 형식 오류
