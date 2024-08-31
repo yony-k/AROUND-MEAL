@@ -88,14 +88,14 @@ public class JwtProvider {
         Jwts.builder()
             .subject(memberName)
             .claim("authorities", authorities)
-            .expiration(new Date(now + (accessTokenTTL * 1000)))
+            .expiration(new Date(now + (accessTokenTTL * 1000L)))
             .signWith(key)
             .compact();
     // 리프레시 토큰 생성
     String refreshToken =
         Jwts.builder()
             .subject(memberName)
-            .expiration(new Date(now + (refreshTokenTTL * 1000)))
+            .expiration(new Date(now + (refreshTokenTTL * 1000L)))
             .signWith(key)
             .compact();
 
