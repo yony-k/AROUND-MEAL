@@ -41,6 +41,7 @@ public class MemberController {
     return ResponseEntity.ok(memberDto);
   }
 
+  // 리프레시 토큰으로 엑세스 토큰, 리프레시 토큰 재발급
   @PostMapping("/refresh_token")
   public ResponseEntity<String> reissueRefreshToken(
       HttpServletRequest request, HttpServletResponse response) {
