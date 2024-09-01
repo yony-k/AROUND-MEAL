@@ -83,7 +83,7 @@ public class JwtService {
     Member findMember =
         memberRepository
             .findById(savedMemberId)
-            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
     return findMember;
   }
 
