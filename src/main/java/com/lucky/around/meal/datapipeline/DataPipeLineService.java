@@ -27,8 +27,8 @@ public class DataPipeLineService {
     rawDataLoadRetryCount = 1; // 재시도 횟수 초기화
     while (!isRawDataLoaded && rawDataLoadRetryCount < MAX_RETRY_COUNT) {
       try {
-        log.info("{}회 실행", rawDataLoadRetryCount);
         rawDataLoadService.executeRawDataLoad();
+        log.info("[rawDataLoadService] {}회 실행", rawDataLoadRetryCount);
         isRawDataLoaded = true;
       } catch (Exception e) {
         log.error("[executeDataPipeLine] 데이터 읽어오기 오류 발생 :", e);
@@ -46,8 +46,8 @@ public class DataPipeLineService {
     boolean isDataProcessed = false;
     while (!isDataProcessed && dataProcessRetryCount < MAX_RETRY_COUNT) {
       try {
-        log.info("{}회 실행", dataProcessRetryCount);
         dataProcessService.executeDataProcess();
+        log.info("[dataProcessService] {}회 실행", dataProcessRetryCount);
         isDataProcessed = true;
       } catch (Exception e) {
         log.error("[executeDataPipeLine] 데이터 가공하기 오류 발생 :", e);
