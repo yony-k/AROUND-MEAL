@@ -2,6 +2,7 @@ package com.lucky.around.meal.datapipeline;
 
 import java.util.List;
 
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.entity.enums.Category;
 import com.lucky.around.meal.repository.RestaurantRepository;
@@ -25,6 +27,7 @@ public class DataProcessService {
   private final RawRestaurantRepository rawRestaurantRepository;
   private final RestaurantRepository restaurantRepository;
   private final ObjectMapper objectMapper;
+  private final GeometryUtil geometryUtil;
 
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
@@ -51,6 +54,7 @@ public class DataProcessService {
 
             try {
               Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
+              log.info("processedRestaurant: " + processedRestaurant);
               if (processedRestaurant != null) {
                 restaurantRepository.save(processedRestaurant);
                 rawRestaurant.setUpdated(false);
@@ -87,6 +91,17 @@ public class DataProcessService {
       String[] doroAddresses = splitAddress(doroAddress);
       String doroDetailAddress = doroAddresses[2];
 
+      String xStr = rootNode.path("X").asText();
+      String yStr = rootNode.path("Y").asText();
+
+      Double longitude = xStr.isEmpty() ? null : Double.parseDouble(xStr);
+      Double latitude = yStr.isEmpty() ? null : Double.parseDouble(yStr);
+
+      Point location =
+          (longitude != null && latitude != null)
+              ? geometryUtil.createPoint(longitude, latitude)
+              : null;
+
       return Restaurant.builder()
           .id(id)
           .restaurantName(restaurantName)
@@ -96,10 +111,11 @@ public class DataProcessService {
           .doroDetailAddress(doroDetailAddress)
           .dosi(dosi)
           .sigungu(sigungu)
+          .location(location)
           .build();
     } catch (Exception e) {
       log.error("[convertToProcessedRestaurant] error ", e);
-      return null; // 혹은 예외 처리 로직을 추가
+      return null;
     }
   }
 
