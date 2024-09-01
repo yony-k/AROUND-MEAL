@@ -24,4 +24,12 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
           + "ORDER BY ST_Distance(r.location, :location) ASC")
   List<Restaurant> findRestaurantsWithinRangeByDistance(
       @Param("location") final Point location, @Param("range") final double range);
+
+  @Query(
+      "SELECT restaurant.id "
+          + "FROM Restaurant restaurant JOIN Rating rating "
+          + "ON restaurant.id = rating.restaurant "
+          + "GROUP BY restaurant.id "
+          + "HAVING COUNT(rating.id) >= :count")
+  List<Restaurant> findRestaurantByRatingCount(@Param("count") final int coutnt);
 }
