@@ -2,6 +2,8 @@ package com.lucky.around.meal.cache.service;
 
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,13 @@ public class RatingCountService {
   @Value("${cache.rating-count}")
   private int ratingNumber;
 
-  // 평가 수 기준 맛집 목록 자동 업데이트
+  @PostConstruct
+  public void init() {
+    log.error("평가 수 기준 맛집 목록 업로드");
+    cachingByRatingCount();
+  }
+
+  // 평가 수 기준 맛집 목록 자동 업로드
   @Scheduled(cron = "0 30 0 * * ?")
   public void cachingByRatingCount() {
     try {
@@ -40,7 +48,7 @@ public class RatingCountService {
       // Redis에 저장
       forRedisRepository.saveAll(restaurantForRedisList);
     } catch (Exception e) {
-      log.error("평가 수 기준 맛집 목록 업데이트 실패: ", e.getMessage());
+      log.error("평가 수 기준 맛집 목록 업로드 실패: ", e.getMessage());
     }
   }
 }

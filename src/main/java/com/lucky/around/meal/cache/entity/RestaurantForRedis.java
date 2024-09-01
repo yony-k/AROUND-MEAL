@@ -30,8 +30,8 @@ public class RestaurantForRedis implements Serializable {
   private String doroDetailAddress;
   private Category category;
   private String restaurantTel;
-  private double lat;
   private double lon;
+  private double lat;
   private double ratingAverage;
 
   public Restaurant toRestaurant(Point location) {
@@ -51,6 +51,16 @@ public class RestaurantForRedis implements Serializable {
   }
 
   public static RestaurantForRedis toRestaurantForRedis(Restaurant restaurant) {
+    // 좌표 초기화(null 대비)
+    double lat = 0.0;
+    double lon = 0.0;
+
+    // null이 아닐 경우 제대로 된 값 넣어주기
+    if (restaurant.getLocation() != null) {
+      lon = restaurant.getLocation().getX();
+      lat = restaurant.getLocation().getY();
+    }
+
     return RestaurantForRedis.builder()
         .id(restaurant.getId())
         .restaurantName(restaurant.getRestaurantName())
@@ -60,8 +70,8 @@ public class RestaurantForRedis implements Serializable {
         .doroDetailAddress(restaurant.getDoroDetailAddress())
         .category(restaurant.getCategory())
         .restaurantTel(restaurant.getRestaurantTel())
-        .lat(restaurant.getLocation().getX())
-        .lon(restaurant.getLocation().getY())
+        .lat(lat)
+        .lon(lon)
         .build();
   }
 }

@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
+import com.lucky.around.meal.cache.entity.RestaurantForRedis;
+import com.lucky.around.meal.cache.repository.RestaurantForRedisRepository;
 import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.controller.dto.GetRestaurantsDto;
 import com.lucky.around.meal.controller.response.*;
@@ -22,17 +24,53 @@ import lombok.RequiredArgsConstructor;
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
+  private final RestaurantForRedisRepository restaurantForRedisRepository;
   private final GeometryUtil geometryUtil;
   private final RatingRepository ratingRepository;
 
   // 맛집 상세 정보 조회
+  // Redis 먼저 조회, Redis에 없으면 DB에서 조회해서 리턴
+  public RestaurantDetailResponseDto getRedisOrDB(String restaurantId) {
+    RestaurantDetailResponseDto restaurantDetail = getRestaurantDetailInRedis(restaurantId);
+    if (restaurantDetail == null) {
+      restaurantDetail = getRestaurantDetail(restaurantId);
+    }
+    return restaurantDetail;
+  }
+
+  // 맛집 상세 정보 조회(Redis)
+  public RestaurantDetailResponseDto getRestaurantDetailInRedis(String restaurantId) {
+    // 맛집 ID로 맛집 조회(Redis)
+    RestaurantForRedis restaurantInRedis = findRedis(restaurantId);
+    // redis에 없으면 넘김
+    if (restaurantInRedis == null) {
+      return null;
+    }
+    // 좌표 변환
+    Point location =
+        geometryUtil.createPoint(restaurantInRedis.getLon(), restaurantInRedis.getLat());
+    // 레디스용 엔티티를 Restaurant 로 변환
+    Restaurant restaurant = restaurantInRedis.toRestaurant(location);
+    // 평가 목록
+    List<RatingResponseDto> ratings = mapRatingsToDto(restaurantId);
+    return mapRestaurantToDto(restaurant, ratings);
+  }
+
+  // 맛집 ID로 맛집 조회(Redis)
+  private RestaurantForRedis findRedis(String restaurantId) {
+    RestaurantForRedis restaurantForRedis =
+        restaurantForRedisRepository.findById(restaurantId).orElse(null);
+    return restaurantForRedis;
+  }
+
+  // 맛집 상세 정보 조회(DB)
   public RestaurantDetailResponseDto getRestaurantDetail(String restaurantId) {
     Restaurant restaurant = findRestaurantById(restaurantId);
     List<RatingResponseDto> ratings = mapRatingsToDto(restaurantId);
     return mapRestaurantToDto(restaurant, ratings);
   }
 
-  // 맛집 ID로 맛집 조회
+  // 맛집 ID로 맛집 조회(DB)
   private Restaurant findRestaurantById(String restaurantId) {
     return restaurantRepository
         .findById(restaurantId)
