@@ -11,14 +11,12 @@ import org.locationtech.jts.geom.Point;
 
 import com.lucky.around.meal.entity.enums.Category;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class Restaurant {
   @Id private String id;
   @NotNull private String restaurantName;
