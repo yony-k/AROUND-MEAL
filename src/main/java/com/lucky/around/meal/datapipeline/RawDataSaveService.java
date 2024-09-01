@@ -7,7 +7,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -51,11 +50,10 @@ public class RawDataSaveService {
     processRawDataSave();
   }
 
-  @Transactional
   @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
   //  @Scheduled(cron = "0 */3 * * * *") // 3분마다 실행
   public synchronized void executeRawDataRead() {
-    log.info("[scheduler] API 재호출입니다.");
+    log.info("[scheduler] 스케줄러 실행 중 입니다.");
     processRawDataSave();
   }
 

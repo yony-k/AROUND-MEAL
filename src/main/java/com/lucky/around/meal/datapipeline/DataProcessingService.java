@@ -47,20 +47,24 @@ public class DataProcessingService {
 
         for (RawRestaurant rawRestaurant : rawRestaurants) {
           if (rawRestaurant.isUpdated()) {
-            log.info("변경된 맛집 : " + rawRestaurant.getJsonData());
-            Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
-            if (processedRestaurant != null) {
-              restaurantRepository.save(processedRestaurant);
-              rawRestaurant.setUpdated(false);
-              rawRestaurantRepository.save(rawRestaurant);
+            log.info("[dataProcessing] 변경된 맛집 : {}", rawRestaurant.getJsonData());
+
+            try {
+              Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
+              if (processedRestaurant != null) {
+                restaurantRepository.save(processedRestaurant);
+                rawRestaurant.setUpdated(false);
+                rawRestaurantRepository.save(rawRestaurant);
+              }
+            } catch (Exception e) {
+              log.error("[dataProcessing] failed restaurant : {}", rawRestaurant.getId(), e);
             }
           }
         }
-
         page++;
       }
     } catch (Exception e) {
-      log.error("[processRawData] error - ", e);
+      log.error("[processRawData] error", e);
     }
   }
 
@@ -94,7 +98,7 @@ public class DataProcessingService {
           .sigungu(sigungu)
           .build();
     } catch (Exception e) {
-      log.error("[convertToProcessedRestaurant] error - ", e);
+      log.error("[convertToProcessedRestaurant] error ", e);
       return null; // 혹은 예외 처리 로직을 추가
     }
   }
