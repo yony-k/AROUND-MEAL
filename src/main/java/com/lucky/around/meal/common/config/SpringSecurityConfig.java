@@ -42,7 +42,6 @@ public class SpringSecurityConfig {
   // 인증 관리자 생성을 위한 설정파일
   private final AuthenticationConfiguration authenticationConfiguration;
   // 예외 처리 핸들러 설정
-  private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
   private final CustomAccessDeniedHandler customAccessDeniedHandler;
   private final CustomLogoutHandler customLogoutHandler;
@@ -76,11 +75,7 @@ public class SpringSecurityConfig {
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
     JwtAuthenticationFilter filter =
-        new JwtAuthenticationFilter(
-            jwtProvider,
-            cookieProvider,
-            refreshTokenRepository,
-            customAuthenticationFailureHandler);
+        new JwtAuthenticationFilter(jwtProvider, cookieProvider, refreshTokenRepository);
     filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
     return filter;
   }

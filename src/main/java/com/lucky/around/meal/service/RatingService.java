@@ -31,7 +31,7 @@ public class RatingService {
     Member member =
         memberRepository
             .findById(memberId)
-            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
 
     Restaurant restaurant =
         restaurantRepository

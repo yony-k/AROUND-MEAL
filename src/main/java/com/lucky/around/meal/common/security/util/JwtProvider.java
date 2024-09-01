@@ -88,14 +88,14 @@ public class JwtProvider {
         Jwts.builder()
             .subject(memberName)
             .claim("authorities", authorities)
-            .expiration(new Date(now + (accessTokenTTL * 1000)))
+            .expiration(new Date(now + (accessTokenTTL * 1000L)))
             .signWith(key)
             .compact();
     // 리프레시 토큰 생성
     String refreshToken =
         Jwts.builder()
             .subject(memberName)
-            .expiration(new Date(now + (refreshTokenTTL * 1000)))
+            .expiration(new Date(now + (refreshTokenTTL * 1000L)))
             .signWith(key)
             .compact();
 
@@ -105,8 +105,7 @@ public class JwtProvider {
   // 액세스 토큰 가져오기
   public String getAccessToken(HttpServletRequest request) {
     // 헤더에서 토큰 가져오기
-    String accessToken = request.getHeader(accessTokenHeader);
-    return accessToken;
+    return request.getHeader(accessTokenHeader);
   }
 
   // 인증 객체 리턴

@@ -20,6 +20,7 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
   public void onLogoutSuccess(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication)
       throws IOException, ServletException {
+    log.error("로그아웃 성공");
     response.setStatus(HttpStatus.OK.value());
     response.setContentType("text/plain; charset=UTF-8");
     response.getWriter().write("로그아웃 성공");
