@@ -58,7 +58,7 @@ public class JwtService {
   // 리퀘스트에서 refreshToken 빼오기
   private Optional<Cookie> getCookie(HttpServletRequest request) {
     Optional<Cookie> findCookie = cookieProvider.getRefreshTokenCookie(request);
-    if (findCookie.isEmpty()) {
+    if (!findCookie.isPresent()) {
       throw new CustomException(SecurityExceptionType.COOKIE_NOT_FOUND);
     }
     return findCookie;
@@ -68,8 +68,9 @@ public class JwtService {
   private Optional<RefreshToken> getRefreshToken(Optional<Cookie> findCookie) {
     Optional<RefreshToken> refreshToken =
         refreshTokenRepository.findById(refreshTokenPrefix + findCookie.get().getValue());
-    if (refreshToken.isEmpty())
+    if (!refreshToken.isPresent()) {
       throw new CustomException(SecurityExceptionType.REFRESHTOKEN_NOT_FOUND);
+    }
     return refreshToken;
   }
 
