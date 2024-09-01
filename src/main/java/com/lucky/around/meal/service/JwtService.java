@@ -68,6 +68,7 @@ public class JwtService {
   private Optional<RefreshToken> getRefreshToken(Optional<Cookie> findCookie) {
     Optional<RefreshToken> refreshToken =
         refreshTokenRepository.findById(refreshTokenPrefix + findCookie.get().getValue());
+    if (!refreshToken.isPresent())
     if (!refreshToken.isPresent()) {
       throw new CustomException(SecurityExceptionType.REFRESHTOKEN_NOT_FOUND);
     }
@@ -83,6 +84,7 @@ public class JwtService {
     Member findMember =
         memberRepository
             .findById(savedMemberId)
+            .orElseThrow(() -> new CustomException(MemberExceptionType.NOT_FOUND_MEMBER));
             .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
     return findMember;
   }
