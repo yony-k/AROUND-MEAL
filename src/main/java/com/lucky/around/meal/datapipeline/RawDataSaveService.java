@@ -2,10 +2,7 @@ package com.lucky.around.meal.datapipeline;
 
 import java.io.IOException;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -44,13 +41,13 @@ public class RawDataSaveService {
 
   private final int MAX_INDEX = 499; // API 어디까지 부를지 결정 (원래는 59만 정도)
 
-  @PostConstruct
+  //  @PostConstruct
   public void init() { // 애플리케이션 시작 후 1번 실행
     log.info("[init] 최초 API 호출입니다.");
     processRawDataSave();
   }
 
-  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
+  //  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
   //  @Scheduled(cron = "0 */3 * * * *") // 3분마다 실행
   public synchronized void executeRawDataRead() {
     log.info("[scheduler] 스케줄러 실행 중 입니다.");

@@ -10,24 +10,64 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class DataPipeLineService {
+  private static final int MAX_RETRY_COUNT = 3;
+  private int rawDataLoadRetryCount;
+  private int dataProcessRetryCount;
 
-  private boolean isRawDataSaveServiceSuccess = false;
+  private final RawDataLoadService rawDataLoadService;
+  private final DataProcessService dataProcessService;
 
-  private final RawDataSaveService rawDataSaveService;
-  private final DataProcessingService dataProcessingService;
-
-  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
-  //  @Scheduled(cron = "0 */3 * * * *") // 3분마다 실행
+  //  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
+  @Scheduled(cron = "0 */1 * * * *") // 1분마다 실행
   public void executeDataPipeLine() {
-    try {
-      if (!isRawDataSaveServiceSuccess) {
-        rawDataSaveService.executeRawDataRead();
-        isRawDataSaveServiceSuccess = true;
+    log.info("[executeDataPipeLine] 데이터 파이프라인 실행");
+
+    // 데이터 읽어오기
+    boolean isRawDataLoaded = false;
+    rawDataLoadRetryCount = 1; // 재시도 횟수 초기화
+    while (!isRawDataLoaded && rawDataLoadRetryCount < MAX_RETRY_COUNT) {
+      try {
+        log.info("{}회 실행", rawDataLoadRetryCount);
+        rawDataLoadService.executeRawDataLoad();
+        isRawDataLoaded = true;
+      } catch (Exception e) {
+        log.error("[executeDataPipeLine] 데이터 읽어오기 오류 발생 :", e);
+        rawDataLoadRetryCount++;
+        if (rawDataLoadRetryCount > MAX_RETRY_COUNT) {
+          log.error("[executeDataPipeLine] 데이터 읽어오기 최대 재시도 횟수 초과 :", e);
+          return;
+        }
+        sleepBeforeRetry();
       }
-      dataProcessingService.dataProcessing(); // dataProcessing 메소드명 변경하기
-    } catch (Exception e) {
-      log.error("[executeDataPipeLine] dataProcessingService - error :", e);
-      isRawDataSaveServiceSuccess = true;
+    }
+
+    // 데이터 가공하기
+    dataProcessRetryCount = 1; // 재시도 횟수 초기화
+    boolean isDataProcessed = false;
+    while (!isDataProcessed && dataProcessRetryCount < MAX_RETRY_COUNT) {
+      try {
+        log.info("{}회 실행", dataProcessRetryCount);
+        dataProcessService.executeDataProcess();
+        isDataProcessed = true;
+      } catch (Exception e) {
+        log.error("[executeDataPipeLine] 데이터 가공하기 오류 발생 :", e);
+        dataProcessRetryCount++;
+        if (dataProcessRetryCount > MAX_RETRY_COUNT) {
+          log.error("[executeDataPipeLine] 데이터 가공하기 최대 재시도 횟수 초과 :", e);
+          return;
+        }
+        sleepBeforeRetry();
+      }
+    }
+  }
+
+  private void sleepBeforeRetry() {
+    try {
+      log.info("[sleepBeforeRetry] 대기중");
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      log.error("[sleepBeforeRetry]", e);
+      Thread.currentThread().interrupt();
     }
   }
 }
