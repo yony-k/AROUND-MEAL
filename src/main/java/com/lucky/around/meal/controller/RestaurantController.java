@@ -25,8 +25,7 @@ public class RestaurantController {
   @GetMapping("/{restaurantId}")
   public ResponseEntity<RestaurantDetailResponseDto> getRestaurantDetail(
       @PathVariable String restaurantId) {
-    RestaurantDetailResponseDto restaurantDetail =
-        restaurantService.getRestaurantDetail(restaurantId);
+    RestaurantDetailResponseDto restaurantDetail = restaurantService.getRedisOrDB(restaurantId);
     return ResponseEntity.ok(restaurantDetail);
   }
 
