@@ -18,6 +18,7 @@ import lombok.*;
 @Getter
 @EqualsAndHashCode
 @RedisHash(value = "Restaurant", timeToLive = 86400)
+@ToString
 public class RestaurantForRedis implements Serializable {
 
   @Id private String id;
@@ -34,17 +35,19 @@ public class RestaurantForRedis implements Serializable {
   private double ratingAverage;
 
   public Restaurant toRestaurant(Point location) {
-    return Restaurant.builder()
-        .id(this.id)
-        .restaurantName(this.restaurantName)
-        .dosi(this.dosi)
-        .sigungu(this.sigungu)
-        .jibunDetailAddress(this.jibunDetailAddress)
-        .doroDetailAddress(this.doroDetailAddress)
-        .category(this.category)
-        .restaurantTel(this.restaurantTel)
-        .location(location)
-        .build();
+    Restaurant restaurant =
+        Restaurant.builder()
+            .id(this.id)
+            .restaurantName(this.restaurantName)
+            .dosi(this.dosi)
+            .sigungu(this.sigungu)
+            .jibunDetailAddress(this.jibunDetailAddress)
+            .doroDetailAddress(this.doroDetailAddress)
+            .category(this.category)
+            .restaurantTel(this.restaurantTel)
+            .location(location)
+            .build();
+    return restaurant;
   }
 
   public static RestaurantForRedis toRestaurantForRedis(Restaurant restaurant) {
