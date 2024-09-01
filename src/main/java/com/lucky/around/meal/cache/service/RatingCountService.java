@@ -2,6 +2,7 @@ package com.lucky.around.meal.cache.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +22,16 @@ public class RatingCountService {
   private final RestaurantRepository restaurantRepository;
   private final RestaurantForRedisRepository forRedisRepository;
 
+  @Value("${cache.rating-count}")
+  private int ratingNumber;
+
+  // 평가 수 기준 맛집 목록 자동 업데이트
   @Scheduled(cron = "0 30 0 * * ?")
   public void cachingByRatingCount() {
     try {
       // DB에서 필터링하여 맛집 목록 가져오기
       List<Restaurant> findRestaurantByRatingCount =
-          restaurantRepository.findRestaurantByRatingCount(1);
+          restaurantRepository.findRestaurantByRatingCount(ratingNumber);
       // Redis용 엔티티로 변환
       List<RestaurantForRedis> restaurantForRedisList =
           findRestaurantByRatingCount.stream()

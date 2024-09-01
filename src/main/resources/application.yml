@@ -43,3 +43,6 @@ cookie:
     accepted-url: /api/members/refresh_token
     domain: localhost
     http-only: true
+
+cache:
+  rating-count: 50
