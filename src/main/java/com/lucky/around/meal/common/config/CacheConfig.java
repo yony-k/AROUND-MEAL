@@ -38,8 +38,8 @@ public class CacheConfig {
 
     // 특정 캐시 관리 (MAP)
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-    // regionList - 시군구 목록 조회 캐싱 TEST 1분
-    cacheConfigurations.put("regionList", defaultConfiguration.entryTtl(Duration.ofMinutes(1)));
+    // regionList - 시군구 목록 조회 캐싱 TEST 10분
+    cacheConfigurations.put("regionList", defaultConfiguration.entryTtl(Duration.ofMinutes(10)));
 
     return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory)
         .cacheDefaults(defaultConfiguration)
