@@ -1,7 +1,6 @@
 package com.lucky.around.meal.cache.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -32,12 +31,9 @@ public class RatingCountService {
       List<RestaurantForRedis> restaurantForRedisList =
           findRestaurantByRatingCount.stream()
               .map(restaurant -> RestaurantForRedis.toRestaurantForRedis(restaurant))
-              .collect(Collectors.toList());
+              .toList();
       // Redis에 저장
-      restaurantForRedisList.forEach(
-          restaurantForRedis -> {
-            forRedisRepository.save(restaurantForRedis);
-          });
+      forRedisRepository.saveAll(restaurantForRedisList);
     } catch (Exception e) {
       log.error("평가 수 기준 맛집 목록 업데이트 실패: ", e.getMessage());
     }

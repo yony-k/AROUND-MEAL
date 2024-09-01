@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
 public class Restaurant {
   @Id private String id;
   @NotNull private String restaurantName;
