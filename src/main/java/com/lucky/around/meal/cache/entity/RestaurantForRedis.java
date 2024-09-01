@@ -46,4 +46,19 @@ public class RestaurantForRedis implements Serializable {
         .location(location)
         .build();
   }
+
+  public static RestaurantForRedis toRestaurantForRedis(Restaurant restaurant) {
+    return RestaurantForRedis.builder()
+        .id(restaurant.getId())
+        .restaurantName(restaurant.getRestaurantName())
+        .dosi(restaurant.getDosi())
+        .sigungu(restaurant.getSigungu())
+        .jibunDetailAddress(restaurant.getJibunDetailAddress())
+        .doroDetailAddress(restaurant.getDoroDetailAddress())
+        .category(restaurant.getCategory())
+        .restaurantTel(restaurant.getRestaurantTel())
+        .lat(restaurant.getLocation().getX())
+        .lon(restaurant.getLocation().getY())
+        .build();
+  }
 }
