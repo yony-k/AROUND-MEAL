@@ -2,12 +2,8 @@ package com.lucky.around.meal.datapipeline;
 
 import java.io.IOException;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -21,11 +17,10 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RawDataSaveService {
+public class RawDataLoadService {
 
   private final WebClient.Builder webClientBuilder;
   private final RawRestaurantRepository rawRestaurantRepository;
-  private final DataProcessingService dataProcessingService;
   private final ObjectMapper objectMapper;
 
   @Value("${API_BASE_URL}")
@@ -43,23 +38,12 @@ public class RawDataSaveService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  private final int MAX_INDEX = 499; // API 어디까지 부를지 결정 (원래는 59만 정도)
+  @Value("${API_MAX_INDEX}")
+  private int MAX_INDEX;
 
-  @PostConstruct
-  public void init() { // 애플리케이션 시작 후 1번 실행
-    log.info("[init] 최초 API 호출입니다.");
-    processRawDataSave();
-  }
+  public synchronized void executeRawDataLoad() {
+    log.info("[executeRawDataLoad] 데이터 읽어오기 실행");
 
-  @Transactional
-  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
-  //  @Scheduled(cron = "0 */3 * * * *") // 3분마다 실행
-  public synchronized void executeRawDataRead() {
-    log.info("[scheduler] API 재호출입니다.");
-    processRawDataSave();
-  }
-
-  public void processRawDataSave() {
     try {
       int startIndex = 1;
       while (startIndex < MAX_INDEX) {
@@ -78,8 +62,6 @@ public class RawDataSaveService {
 
         startIndex += PAGE_SIZE;
       }
-
-      dataProcessingService.dataProcessing(); // 데이터 과정 단계로 넘어가기
     } catch (IOException e) {
       log.error("[processRawDataSave] I/O error - ", e);
     } catch (WebClientResponseException e) {
