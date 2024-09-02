@@ -91,7 +91,7 @@ public class DataProcessService {
       String id = rawRestaurant.getId();
       String restaurantName = rootNode.path("BPLCNM").asText();
       String category = rootNode.path("UPTAENM").asText();
-      String restaurantTel = rootNode.path("SITETEL").asText();
+      String restaurantTel = rootNode.path("SITETEL").asText().replace(" ", "");
 
       String jibunAddress = rootNode.path("SITEWHLADDR").asText();
       String[] jibunAddresses = splitAddress(jibunAddress);
