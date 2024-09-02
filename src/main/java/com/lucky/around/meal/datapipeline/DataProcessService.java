@@ -46,7 +46,7 @@ public class DataProcessService {
 
         for (RawRestaurant rawRestaurant : rawRestaurants) {
           if (rawRestaurant.isUpdated()) {
-            log.info("[dataProcessing] 변경된 맛집 : {}", rawRestaurant.getJsonData());
+            //            log.info("[dataProcessing] 변경된 맛집 : {}", rawRestaurant.getJsonData());
 
             try {
               Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
@@ -76,7 +76,7 @@ public class DataProcessService {
       String yStr = rootNode.path("Y").asText();
 
       if (xStr.isEmpty() || yStr.isEmpty()) {
-        log.warn("[skip] 유효하지 않은 데이터는 저장하지 않음 id {}", rawRestaurant.getId());
+        //        log.info("[skip] 유효하지 않은 데이터는 저장하지 않음 id {}", rawRestaurant.getId());
         return null;
       }
 
