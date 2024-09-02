@@ -7,6 +7,7 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.lucky.around.meal.cache.service.RatingCountService;
 import com.lucky.around.meal.cache.service.ViewCountService;
 import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.controller.dto.GetRestaurantsDto;
@@ -27,6 +28,7 @@ public class RestaurantService {
   private final GeometryUtil geometryUtil;
   private final RatingRepository ratingRepository;
   private final ViewCountService viewCountService;
+  private final RatingCountService ratingCountService;
 
   // 캐시에서 맛집 상세 정보를 조회하거나, 캐시가 없으면 데이터베이스에서 조회하여 캐시에 저장
   @Cacheable(value = "restaurantDetail", key = "#restaurantId")
@@ -53,6 +55,20 @@ public class RestaurantService {
               return mapRestaurantToDto(restaurant, ratings);
             })
         .collect(Collectors.toList());
+  }
+
+  // 평가 수 기준 맛집 상세 정보 목록 조회
+  public List<RestaurantDetailResponseDto> getRestaurantsByRaitinCount() {
+    List<Restaurant> restaurants = ratingCountService.getRaitinCountList();
+    List<RestaurantDetailResponseDto> result =
+        restaurants.stream()
+            .map(
+                restaurant -> {
+                  List<RatingResponseDto> ratings = mapRatingsToDto(restaurant.getId());
+                  return mapRestaurantToDto(restaurant, ratings);
+                })
+            .toList();
+    return result;
   }
 
   // DB에서 맛집 상세 정보 조회
