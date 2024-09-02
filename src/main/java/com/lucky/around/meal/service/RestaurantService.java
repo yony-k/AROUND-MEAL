@@ -54,7 +54,7 @@ public class RestaurantService {
               List<RatingResponseDto> ratings = mapRatingsToDto(restaurant.getId());
               return mapRestaurantToDto(restaurant, ratings);
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // 평가 수 기준 맛집 상세 정보 목록 조회
@@ -89,7 +89,7 @@ public class RestaurantService {
   private List<RatingResponseDto> mapRatingsToDto(String restaurantId) {
     return ratingRepository.findByRestaurantIdOrderByCreateAtDesc(restaurantId).stream()
         .map(this::mapRatingToDto)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // Rating 객체를 DTO로 변환
