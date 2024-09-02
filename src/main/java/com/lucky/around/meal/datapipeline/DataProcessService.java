@@ -3,7 +3,6 @@ package com.lucky.around.meal.datapipeline;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,17 +28,14 @@ public class DataProcessService {
   private final ObjectMapper objectMapper;
   private final GeometryUtil geometryUtil;
 
-  @Value("${API_PAGE_SIZE}")
-  private int PAGE_SIZE;
-
-  public synchronized void executeDataProcess() {
-    log.info("[executeDataProcess] 데이터 가공하기 실행");
+  public synchronized void executeDataProcess(int pageSize) {
+    log.info("[execute] 데이터 가공하기 - size : {}.", pageSize);
 
     try {
       int page = 0;
 
       while (true) {
-        Pageable pageRequest = PageRequest.of(page, PAGE_SIZE);
+        Pageable pageRequest = PageRequest.of(page, pageSize);
         Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
 
         if (rawRestaurantsPage.isEmpty()) {
@@ -54,21 +50,20 @@ public class DataProcessService {
 
             try {
               Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
-              log.info("processedRestaurant: " + processedRestaurant);
               if (processedRestaurant != null) {
                 restaurantRepository.save(processedRestaurant);
                 rawRestaurant.setUpdated(false);
                 rawRestaurantRepository.save(rawRestaurant);
               }
             } catch (Exception e) {
-              log.error("[dataProcessing] failed restaurant : {}", rawRestaurant.getId(), e);
+              log.error("[fail] 데이터 가공하기 id: {}", rawRestaurant.getId(), e);
             }
           }
         }
         page++;
       }
     } catch (Exception e) {
-      log.error("[processRawData] error", e);
+      log.error("[fail] 데이터 가공하기", e);
     }
   }
 
@@ -76,10 +71,24 @@ public class DataProcessService {
     try {
       JsonNode rootNode = objectMapper.readTree(rawRestaurant.getJsonData());
 
+      // 좌표 유효하지 않은 음식점은 저장하지 않기
+      String xStr = rootNode.path("X").asText();
+      String yStr = rootNode.path("Y").asText();
+
+      if (xStr.isEmpty() || yStr.isEmpty()) {
+        log.warn("[skip] 유효하지 않은 데이터는 저장하지 않음 id {}", rawRestaurant.getId());
+        return null;
+      }
+
+      double longitude = Double.parseDouble(xStr);
+      double latitude = Double.parseDouble(yStr);
+
+      Point location = geometryUtil.createPoint(longitude, latitude);
+
       String id = rawRestaurant.getId();
       String restaurantName = rootNode.path("BPLCNM").asText();
       String category = rootNode.path("UPTAENM").asText();
-      String restaurantTel = rootNode.path("SITETEL").asText();
+      String restaurantTel = rootNode.path("SITETEL").asText().replace(" ", "");
 
       String jibunAddress = rootNode.path("SITEWHLADDR").asText();
       String[] jibunAddresses = splitAddress(jibunAddress);
@@ -90,17 +99,6 @@ public class DataProcessService {
       String doroAddress = rootNode.path("RDNWHLADDR").asText();
       String[] doroAddresses = splitAddress(doroAddress);
       String doroDetailAddress = doroAddresses[2];
-
-      String xStr = rootNode.path("X").asText();
-      String yStr = rootNode.path("Y").asText();
-
-      Double longitude = xStr.isEmpty() ? null : Double.parseDouble(xStr);
-      Double latitude = yStr.isEmpty() ? null : Double.parseDouble(yStr);
-
-      Point location =
-          (longitude != null && latitude != null)
-              ? geometryUtil.createPoint(longitude, latitude)
-              : null;
 
       return Restaurant.builder()
           .id(id)
@@ -114,7 +112,7 @@ public class DataProcessService {
           .location(location)
           .build();
     } catch (Exception e) {
-      log.error("[convertToProcessedRestaurant] error ", e);
+      log.error("[fail] 데이터 파싱하기 ", e);
       return null;
     }
   }

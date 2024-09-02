@@ -35,43 +35,27 @@ public class RawDataLoadService {
   @Value("${API_FORMAT_TYPE}")
   private String FORMAT_TYPE;
 
-  @Value("${API_PAGE_SIZE}")
-  private int PAGE_SIZE;
-
-  @Value("${API_MAX_INDEX}")
-  private int MAX_INDEX;
-
-  public synchronized void executeRawDataLoad() {
-    log.info("[executeRawDataLoad] 데이터 읽어오기 실행");
+  public synchronized void executeRawDataLoad(int startIndex, int endIndex) {
+    log.info("[execute] 데이터 읽어오기 - index {} to {}.", startIndex, endIndex);
 
     try {
-      int startIndex = 1;
-      while (startIndex < MAX_INDEX) {
-        int endIndex = startIndex + PAGE_SIZE - 1;
-        String responseData = fetchData(startIndex, endIndex).block();
+      String responseData = fetchData(startIndex, endIndex).block();
 
-        JsonNode rootNode = objectMapper.readTree(responseData);
-        JsonNode rowNodes = rootNode.path(SERVICE_NAME).path("row");
+      JsonNode rootNode = objectMapper.readTree(responseData);
+      JsonNode rowNodes = rootNode.path(SERVICE_NAME).path("row");
 
-        for (JsonNode rowNode : rowNodes) {
-          String id = rowNode.path("MGTNO").asText("");
-          String jsonData = rowNode.toString();
+      for (JsonNode rowNode : rowNodes) {
+        String id = rowNode.path("MGTNO").asText("");
+        String jsonData = rowNode.toString();
 
-          saveRawData(id, jsonData);
-        }
-
-        startIndex += PAGE_SIZE;
+        saveRawData(id, jsonData);
       }
     } catch (IOException e) {
-      log.error("[processRawDataSave] I/O error - ", e);
+      log.error("[fail] 데이터 읽어오기 - I/O error", e);
     } catch (WebClientResponseException e) {
-      log.error(
-          "[processRawDataSave] API call error - Status: {}, Body: {}",
-          e.getStatusCode(),
-          e.getResponseBodyAsString(),
-          e);
+      log.error("[fail] 데이터 읽어오기 - API call error", e);
     } catch (Exception e) {
-      log.error("[processRawDataSave] Unexpected error - ", e);
+      log.error("[fail] 데이터 읽어오기 - Unexpected error", e);
     }
   }
 
@@ -96,8 +80,7 @@ public class RawDataLoadService {
       RawRestaurant rawRestaurant =
           RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(newHash).build();
       rawRestaurantRepository.save(rawRestaurant);
-      log.info(
-          "[saveRawData] Saved data - id : {}, new entry: {}", id, existedRawRestaurant == null);
+      log.info("[success] 원시 데이터 저장 - id : {}", id);
     }
   }
 }
