@@ -53,6 +53,7 @@ public class RatingCountService {
       // Redis에 저장
       saveToRedis(findRestaurantByRatingCount);
     } catch (Exception e) {
+      // info로 바꾸기
       log.error("평가 수 기준 맛집 목록 업로드 실패: ", e);
     }
   }
@@ -87,6 +88,7 @@ public class RatingCountService {
     if (keys == null || keys.isEmpty()) {
       throw new CustomException(CommonExceptionType.INSPECTION_TIME);
     }
+
     // Map 형태로 받아와서 HashMap으로 변환 다시 Restaurant로 변환
     List<Restaurant> list =
         keys.stream()
@@ -101,7 +103,7 @@ public class RatingCountService {
   public void updateRating(String restaurantId, String field, double ratingAverage) {
     String key = CACHE_KEY_PREFIX + restaurantId;
     redisTemplate.opsForHash().put(key, field, String.valueOf(ratingAverage));
-    log.error("평가 업데이트 완료");
+    log.info("평가 업데이트 완료");
   }
 
   // 레디스의 해시맵을 Restaurant로 변환
@@ -114,6 +116,7 @@ public class RatingCountService {
         .jibunDetailAddress(String.valueOf(restaurantMap.get("jibunDetailAddress")))
         .doroDetailAddress(String.valueOf(restaurantMap.get("doroDetailAddress")))
         .category(Category.valueOf(String.valueOf(restaurantMap.get("category"))))
+        .restaurantTel(String.valueOf(restaurantMap.get("restaurantTel")))
         .location(
             geometryUtil.createPoint(
                 Double.parseDouble(String.valueOf(restaurantMap.get("lon"))),
