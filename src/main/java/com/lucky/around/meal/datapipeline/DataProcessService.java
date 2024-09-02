@@ -54,7 +54,6 @@ public class DataProcessService {
 
             try {
               Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
-              log.info("processedRestaurant: " + processedRestaurant);
               if (processedRestaurant != null) {
                 restaurantRepository.save(processedRestaurant);
                 rawRestaurant.setUpdated(false);
@@ -76,6 +75,19 @@ public class DataProcessService {
     try {
       JsonNode rootNode = objectMapper.readTree(rawRestaurant.getJsonData());
 
+      // 좌표 유효하지 않은 음식점은 저장하지 않기
+      String xStr = rootNode.path("X").asText();
+      String yStr = rootNode.path("Y").asText();
+
+      if (xStr.isEmpty() || yStr.isEmpty()) {
+        return null;
+      }
+
+      double longitude = Double.parseDouble(xStr);
+      double latitude = Double.parseDouble(yStr);
+
+      Point location = geometryUtil.createPoint(longitude, latitude);
+
       String id = rawRestaurant.getId();
       String restaurantName = rootNode.path("BPLCNM").asText();
       String category = rootNode.path("UPTAENM").asText();
@@ -90,17 +102,6 @@ public class DataProcessService {
       String doroAddress = rootNode.path("RDNWHLADDR").asText();
       String[] doroAddresses = splitAddress(doroAddress);
       String doroDetailAddress = doroAddresses[2];
-
-      String xStr = rootNode.path("X").asText();
-      String yStr = rootNode.path("Y").asText();
-
-      Double longitude = xStr.isEmpty() ? null : Double.parseDouble(xStr);
-      Double latitude = yStr.isEmpty() ? null : Double.parseDouble(yStr);
-
-      Point location =
-          (longitude != null && latitude != null)
-              ? geometryUtil.createPoint(longitude, latitude)
-              : null;
 
       return Restaurant.builder()
           .id(id)
