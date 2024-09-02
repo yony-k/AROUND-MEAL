@@ -132,7 +132,7 @@ public class SpringSecurityConfig {
                     .permitAll()
                     // 이외 모든 요청 인증 필요
                     .anyRequest()
-                    .permitAll())
+                    .authenticated())
         // 예외 처리 핸들러 설정
         .exceptionHandling(
             exceptionHandling ->
