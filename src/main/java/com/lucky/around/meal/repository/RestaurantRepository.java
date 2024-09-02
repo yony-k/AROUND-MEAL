@@ -13,15 +13,15 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
 
   @Query(
       "SELECT r FROM Restaurant r "
-          + "WHERE ST_Distance(r.location, :location) <= :range "
+          + "WHERE ST_Distance(ST_Transform(r.location, 4326), ST_Transform(:location, 4326)) <= :range "
           + "ORDER BY r.ratingAverage DESC")
   List<Restaurant> findRestaurantsWithinRangeByRating(
       @Param("location") final Point location, @Param("range") final double range);
 
   @Query(
       "SELECT r FROM Restaurant r "
-          + "WHERE ST_Distance(r.location, :location) <= :range "
-          + "ORDER BY ST_Distance(r.location, :location) ASC")
+          + "WHERE ST_Distance(ST_Transform(r.location, 4326), ST_Transform(:location, 4326)) <= :range "
+          + "ORDER BY ST_Distance(ST_Transform(r.location, 4326), ST_Transform(:location, 4326)) ASC")
   List<Restaurant> findRestaurantsWithinRangeByDistance(
       @Param("location") final Point location, @Param("range") final double range);
 
