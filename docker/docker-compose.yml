@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  postgis:
+    image: postgres
+    container_name: postgis
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: around-meal
+      POSTGRES_PASSWORD: wanted-lucky-seven-forever
+    hostname: postgres
+    volumes:
+      - /Desktop/around-meal-db:/var/lib/postgresql/data
