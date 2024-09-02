@@ -76,10 +76,10 @@ public class DataPipeLineService {
     while (retryCount <= MAX_RETRY_COUNT) {
       try {
         dataProcessService.executeDataProcess(PAGE_SIZE);
-        log.info("[success] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount);
+        log.info("[success] 데이터 가공하기 ({}번째 시도).", retryCount);
         return true;
       } catch (Exception e) {
-        log.error("[fail] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount, e);
+        log.error("[fail] 데이터 가공하기 ({}번째 시도).", retryCount, e);
         retryCount++;
         if (retryCount > MAX_RETRY_COUNT) {
           log.error("[fail] 데이터 가공하기 최대 재시도 횟수 초과", e);
