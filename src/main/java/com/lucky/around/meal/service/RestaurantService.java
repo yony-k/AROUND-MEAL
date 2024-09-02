@@ -34,6 +34,27 @@ public class RestaurantService {
     return getRestaurantDetailFromDB(restaurantId);
   }
 
+  // 조회수가 N개 이상인 맛집 상세 정보 캐시 저장
+  @Cacheable(value = "highViewCountRestaurants", key = "#minViews")
+  public List<RestaurantDetailResponseDto> getRestaurantsWithMinViews(long minViews) {
+    // 조회수 N개 이상인 맛집을 DB에서 조회
+    List<Restaurant> restaurants = restaurantRepository.findAll();
+
+    // 조회수 기준에 따라 필터링
+    return restaurants.stream()
+        .filter(
+            restaurant -> {
+              Long viewCount = viewCountService.getViewCount(restaurant.getId());
+              return viewCount >= minViews;
+            })
+        .map(
+            restaurant -> {
+              List<RatingResponseDto> ratings = mapRatingsToDto(restaurant.getId());
+              return mapRestaurantToDto(restaurant, ratings);
+            })
+        .collect(Collectors.toList());
+  }
+
   // DB에서 맛집 상세 정보 조회
   public RestaurantDetailResponseDto getRestaurantDetailFromDB(String restaurantId) {
     Restaurant restaurant = findRestaurantById(restaurantId);
