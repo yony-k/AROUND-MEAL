@@ -1,5 +1,7 @@
 package com.lucky.around.meal.datapipeline;
 
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,14 @@ public class DataPipeLineService {
   private final RawDataLoadService rawDataLoadService;
   private final DataProcessService dataProcessService;
 
-  //  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
-  @Scheduled(cron = "0 */1 * * * *") // 1분마다 실행
+  @PostConstruct
+  public void init() {
+    log.info("[init] 애플리케이션 시작 시 데이터 파이프라인 실행");
+    executeDataPipeLine();
+  }
+
+  @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
+  //  @Scheduled(cron = "0 */1 * * * *") // 1분마다 실행
   public void executeDataPipeLine() {
     log.info("[executeDataPipeLine] 데이터 파이프라인 실행");
 
