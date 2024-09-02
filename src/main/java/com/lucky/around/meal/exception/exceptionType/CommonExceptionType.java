@@ -26,7 +26,9 @@ public enum CommonExceptionType implements ExceptionType {
   // 변환 에러
   TRANS_ENTITY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Entity 변환 에러"),
   TRANS_JSON_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 변환 에러"),
-  ;
+
+  // 평가 수 기준 업로드 시간
+  INSPECTION_TIME(HttpStatus.NO_CONTENT, "목록을 다시 업로드 중입니다. 잠시 후 다시 시도해주세요.");
 
   private final HttpStatus status;
   private final String message;

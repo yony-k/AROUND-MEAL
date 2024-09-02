@@ -49,4 +49,11 @@ public class RestaurantController {
 
     return restaurantService.getRestaurantsWithinRange(lat, lon, range, sort);
   }
+
+  // 평가 수 기준 맛집 상세 정보 목록 조회
+  @GetMapping("/rating-count")
+  public ResponseEntity<List<RestaurantDetailResponseDto>> getRestaurantsByRaitinCount() {
+    List<RestaurantDetailResponseDto> restaurants = restaurantService.getRestaurantsByRaitinCount();
+    return ResponseEntity.ok(restaurants);
+  }
 }

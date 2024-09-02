@@ -3,6 +3,7 @@ package com.lucky.around.meal.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lucky.around.meal.cache.service.RatingCountService;
 import com.lucky.around.meal.controller.request.RatingRequestDto;
 import com.lucky.around.meal.controller.response.RatingResponseDto;
 import com.lucky.around.meal.entity.Member;
@@ -24,6 +25,7 @@ public class RatingService {
   private final RatingRepository ratingRepository;
   private final MemberRepository memberRepository;
   private final RestaurantRepository restaurantRepository;
+  private final RatingCountService ratingCountService;
 
   @Transactional
   public RatingResponseDto createRating(Long memberId, RatingRequestDto requestDto) {
@@ -54,6 +56,9 @@ public class RatingService {
     restaurant.updateRatingAverage(ratingAverage); // 평균 변화
 
     restaurantRepository.save(restaurant); // 저장
+
+    // Redis에 등록된 평가 수 기준 맛집 목록 속 맛집의 식당 평균 갱신
+    ratingCountService.updateRating(restaurant.getId(), "ratingAverage", ratingAverage);
 
     return new RatingResponseDto(
         rating.getId(),
