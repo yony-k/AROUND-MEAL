@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.locationtech.jts.geom.Point;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.lucky.around.meal.cache.entity.RestaurantForRedis;
-import com.lucky.around.meal.cache.repository.RestaurantForRedisRepository;
+import com.lucky.around.meal.cache.service.ViewCountService;
 import com.lucky.around.meal.common.util.GeometryUtil;
 import com.lucky.around.meal.controller.dto.GetRestaurantsDto;
 import com.lucky.around.meal.controller.response.*;
@@ -24,60 +24,31 @@ import lombok.RequiredArgsConstructor;
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
-  private final RestaurantForRedisRepository restaurantForRedisRepository;
   private final GeometryUtil geometryUtil;
   private final RatingRepository ratingRepository;
+  private final ViewCountService viewCountService;
 
-  // 맛집 상세 정보 조회
-  // Redis 먼저 조회, Redis에 없으면 DB에서 조회해서 리턴
-  public RestaurantDetailResponseDto getRedisOrDB(String restaurantId) {
-    RestaurantDetailResponseDto restaurantDetail = getRestaurantDetailInRedis(restaurantId);
-    if (restaurantDetail == null) {
-      restaurantDetail = getRestaurantDetail(restaurantId);
-    }
-    return restaurantDetail;
-  }
-
-  // 맛집 상세 정보 조회(Redis)
-  public RestaurantDetailResponseDto getRestaurantDetailInRedis(String restaurantId) {
-    // 맛집 ID로 맛집 조회(Redis)
-    RestaurantForRedis restaurantInRedis = findRedis(restaurantId);
-    // redis에 없으면 넘김
-    if (restaurantInRedis == null) {
-      return null;
-    }
-    // 좌표 변환
-    Point location =
-        geometryUtil.createPoint(restaurantInRedis.getLon(), restaurantInRedis.getLat());
-    // 레디스용 엔티티를 Restaurant 로 변환
-    Restaurant restaurant = restaurantInRedis.toRestaurant(location);
-    // 평가 목록
-    List<RatingResponseDto> ratings = mapRatingsToDto(restaurantId);
-    return mapRestaurantToDto(restaurant, ratings);
-  }
-
-  // 맛집 ID로 맛집 조회(Redis)
-  private RestaurantForRedis findRedis(String restaurantId) {
-    RestaurantForRedis restaurantForRedis =
-        restaurantForRedisRepository.findById(restaurantId).orElse(null);
-    return restaurantForRedis;
-  }
-
-  // 맛집 상세 정보 조회(DB)
+  // 캐시에서 맛집 상세 정보를 조회하거나, 캐시가 없으면 데이터베이스에서 조회하여 캐시에 저장
+  @Cacheable(value = "restaurantDetail", key = "#restaurantId")
   public RestaurantDetailResponseDto getRestaurantDetail(String restaurantId) {
+    return getRestaurantDetailFromDB(restaurantId);
+  }
+
+  // DB에서 맛집 상세 정보 조회
+  public RestaurantDetailResponseDto getRestaurantDetailFromDB(String restaurantId) {
     Restaurant restaurant = findRestaurantById(restaurantId);
     List<RatingResponseDto> ratings = mapRatingsToDto(restaurantId);
     return mapRestaurantToDto(restaurant, ratings);
   }
 
-  // 맛집 ID로 맛집 조회(DB)
+  // 맛집 ID로 맛집 조회
   private Restaurant findRestaurantById(String restaurantId) {
     return restaurantRepository
         .findById(restaurantId)
         .orElseThrow(() -> new CustomException(RestaurantExceptionType.RESTAURANT_NOT_FOUND));
   }
 
-  // 맛집 ID로 평점 리스트를 DTO 리스트로 변환 -> 최신순 정렬 필요함
+  // 맛집 ID로 평점 리스트를 DTO 리스트로 변환
   private List<RatingResponseDto> mapRatingsToDto(String restaurantId) {
     return ratingRepository.findByRestaurantIdOrderByCreateAtDesc(restaurantId).stream()
         .map(this::mapRatingToDto)
