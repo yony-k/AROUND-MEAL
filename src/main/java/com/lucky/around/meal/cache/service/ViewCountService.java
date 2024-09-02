@@ -1,6 +1,9 @@
 package com.lucky.around.meal.cache.service;
 
+import java.util.Set;
+
 import org.springframework.data.redis.core.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -29,5 +32,16 @@ public class ViewCountService {
     ValueOperations<String, String> ops = redisTemplate.opsForValue();
     String value = ops.get(key);
     return value != null ? Long.parseLong(value) : 0L;
+  }
+
+  // 조회수 초기화
+  @Scheduled(cron = "0 0 11,17 * * ?") // 매일 오전 11시와 오후 5시에 실행
+  public void resetViewCounts() {
+    Set<String> keys = redisTemplate.keys(VIEW_COUNT_KEY_PREFIX + "*");
+    if (keys != null) {
+      for (String key : keys) {
+        redisTemplate.opsForValue().set(key, "0");
+      }
+    }
   }
 }
