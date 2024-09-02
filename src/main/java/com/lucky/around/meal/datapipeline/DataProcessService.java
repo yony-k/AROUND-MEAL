@@ -3,7 +3,6 @@ package com.lucky.around.meal.datapipeline;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,17 +28,14 @@ public class DataProcessService {
   private final ObjectMapper objectMapper;
   private final GeometryUtil geometryUtil;
 
-  @Value("${API_PAGE_SIZE}")
-  private int PAGE_SIZE;
-
-  public synchronized void executeDataProcess() {
+  public synchronized void executeDataProcess(int pageSize) {
     log.info("[executeDataProcess] 데이터 가공하기 실행");
 
     try {
       int page = 0;
 
       while (true) {
-        Pageable pageRequest = PageRequest.of(page, PAGE_SIZE);
+        Pageable pageRequest = PageRequest.of(page, pageSize);
         Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
 
         if (rawRestaurantsPage.isEmpty()) {
