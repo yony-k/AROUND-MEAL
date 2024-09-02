@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DataPipeLineService {
   private static final int MAX_RETRY_COUNT = 3;
+  private static final int RETRY_DELAY_MS = 5000;
 
   @Value("${API_MAX_INDEX}")
   private int MAX_INDEX;
@@ -38,64 +39,65 @@ public class DataPipeLineService {
     log.info("[execute] 데이터 파이프라인");
 
     int startIndex = 1;
-    boolean pipelineSuccess = true;
-
     while (startIndex <= MAX_INDEX) {
       int endIndex = startIndex + PAGE_SIZE - 1;
 
-      /* 데이터 읽어오기 */
-      boolean isRawDataLoaded = false;
-      rawDataLoadRetryCount = 1; // 재시도 횟수 초기화
-      while (!isRawDataLoaded && rawDataLoadRetryCount <= MAX_RETRY_COUNT) {
-        try {
-          rawDataLoadService.executeRawDataLoad(startIndex, endIndex);
-          log.info("[success] 데이터 읽어오기 ({}번째 시도).", dataProcessRetryCount);
-          isRawDataLoaded = true;
-        } catch (Exception e) {
-          log.error("[fail] 데이터 읽어오기 ({}번째 시도).", dataProcessRetryCount, e);
-          rawDataLoadRetryCount++;
-          if (rawDataLoadRetryCount > MAX_RETRY_COUNT) {
-            log.error("[fail] 데이터 읽어오기 최대 재시도 횟수 초과", e);
-            pipelineSuccess = false;
-            break;
-          }
-          sleepBeforeRetry();
-        }
+      if (!loadRawData(startIndex, endIndex)) {
+        break;
       }
 
-      if (!pipelineSuccess) break;
-
-      /* 데이터 가공하기 */
-      dataProcessRetryCount = 1; // 재시도 횟수 초기화
-      boolean isDataProcessed = false;
-      while (!isDataProcessed && dataProcessRetryCount <= MAX_RETRY_COUNT) {
-        try {
-          dataProcessService.executeDataProcess(PAGE_SIZE);
-          log.info("[success] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount);
-          isDataProcessed = true;
-        } catch (Exception e) {
-          log.error("[fail] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount, e);
-          dataProcessRetryCount++;
-          if (dataProcessRetryCount > MAX_RETRY_COUNT) {
-            log.error("[fail] 데이터 가공하기 최대 재시도 횟수 초과", e);
-            pipelineSuccess = false;
-            break;
-          }
-          sleepBeforeRetry();
-        }
+      if (!processData()) {
+        break;
       }
 
-      if (!pipelineSuccess) break;
-
-      // 다음 데이터를 처리하기 위한 시작 인덱스 업데이트
       startIndex += PAGE_SIZE;
     }
   }
 
+  private boolean loadRawData(int startIndex, int endIndex) {
+    int retryCount = 1; // 재시도 횟수 초기화
+    while (retryCount <= MAX_RETRY_COUNT) {
+      try {
+        rawDataLoadService.executeRawDataLoad(startIndex, endIndex);
+        log.info("[success] 데이터 읽어오기 ({}번째 시도).", retryCount);
+        return true;
+      } catch (Exception e) {
+        log.error("[fail] 데이터 읽어오기 ({}번째 시도).", retryCount, e);
+        retryCount++;
+        if (retryCount > MAX_RETRY_COUNT) {
+          log.error("[fail] 데이터 읽어오기 최대 재시도 횟수 초과", e);
+          return false;
+        }
+        sleepBeforeRetry();
+      }
+    }
+    return false; // 실제로는 도달하지 않는 코드
+  }
+
+  private boolean processData() {
+    int retryCount = 1; // 재시도 횟수 초기화
+    while (retryCount <= MAX_RETRY_COUNT) {
+      try {
+        dataProcessService.executeDataProcess(PAGE_SIZE);
+        log.info("[success] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount);
+        return true;
+      } catch (Exception e) {
+        log.error("[fail] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount, e);
+        retryCount++;
+        if (retryCount > MAX_RETRY_COUNT) {
+          log.error("[fail] 데이터 가공하기 최대 재시도 횟수 초과", e);
+          return false;
+        }
+        sleepBeforeRetry();
+      }
+    }
+    return false; // 실제로는 도달하지 않는 코드
+  }
+
   private void sleepBeforeRetry() {
     try {
-      log.info("[sleep] 5초 후, 재실행");
-      Thread.sleep(5000);
+      log.info("[sleep] {}초 후, 재실행", RETRY_DELAY_MS);
+      Thread.sleep(RETRY_DELAY_MS);
     } catch (InterruptedException e) {
       log.error("[sleepBeforeRetry]", e);
       Thread.currentThread().interrupt();
