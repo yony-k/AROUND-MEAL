@@ -31,6 +31,15 @@ public class RestaurantController {
     return ResponseEntity.ok(restaurantDetail);
   }
 
+  // 조회수가 N개 이상인 맛집 상세 정보 조회
+  @GetMapping("/high-view-count")
+  public ResponseEntity<List<RestaurantDetailResponseDto>> getRestaurantsWithMinViews(
+      @RequestParam long minViews) {
+    List<RestaurantDetailResponseDto> restaurants =
+        restaurantService.getRestaurantsWithMinViews(minViews);
+    return ResponseEntity.ok(restaurants);
+  }
+
   @GetMapping()
   public List<GetRestaurantsDto> findRestaurantsWithinRange(
       final @RequestParam double lat,
