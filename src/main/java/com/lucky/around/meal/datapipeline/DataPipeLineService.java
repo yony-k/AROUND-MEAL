@@ -29,13 +29,13 @@ public class DataPipeLineService {
 
   @PostConstruct
   public void init() {
-    log.info("[init] 애플리케이션 시작 시 데이터 파이프라인 실행");
+    log.info("[init] 데이터 파이프라인");
     executeDataPipeLine();
   }
 
   @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
   public void executeDataPipeLine() {
-    log.info("[executeDataPipeLine] 데이터 파이프라인 실행");
+    log.info("[execute] 데이터 파이프라인");
 
     int startIndex = 1;
     boolean pipelineSuccess = true;
@@ -49,13 +49,13 @@ public class DataPipeLineService {
       while (!isRawDataLoaded && rawDataLoadRetryCount <= MAX_RETRY_COUNT) {
         try {
           rawDataLoadService.executeRawDataLoad(startIndex, endIndex);
-          log.info("[rawDataLoadService] {}회 실행 완료", rawDataLoadRetryCount);
+          log.info("[success] 데이터 읽어오기 ({}번째 시도).", dataProcessRetryCount);
           isRawDataLoaded = true;
         } catch (Exception e) {
-          log.error("[executeDataPipeLine] 데이터 읽어오기 오류 발생 :", e);
+          log.error("[fail] 데이터 읽어오기 ({}번째 시도).", dataProcessRetryCount, e);
           rawDataLoadRetryCount++;
           if (rawDataLoadRetryCount > MAX_RETRY_COUNT) {
-            log.error("[executeDataPipeLine] 데이터 읽어오기 최대 재시도 횟수 초과 :", e);
+            log.error("[fail] 데이터 읽어오기 최대 재시도 횟수 초과", e);
             pipelineSuccess = false;
             break;
           }
@@ -71,13 +71,13 @@ public class DataPipeLineService {
       while (!isDataProcessed && dataProcessRetryCount <= MAX_RETRY_COUNT) {
         try {
           dataProcessService.executeDataProcess(PAGE_SIZE);
-          log.info("[dataProcessService] {}회 실행 완료", dataProcessRetryCount);
+          log.info("[success] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount);
           isDataProcessed = true;
         } catch (Exception e) {
-          log.error("[executeDataPipeLine] 데이터 가공하기 오류 발생 :", e);
+          log.error("[fail] 데이터 가공하기 ({}번째 시도).", dataProcessRetryCount, e);
           dataProcessRetryCount++;
           if (dataProcessRetryCount > MAX_RETRY_COUNT) {
-            log.error("[executeDataPipeLine] 데이터 가공하기 최대 재시도 횟수 초과 :", e);
+            log.error("[fail] 데이터 가공하기 최대 재시도 횟수 초과", e);
             pipelineSuccess = false;
             break;
           }
@@ -94,7 +94,7 @@ public class DataPipeLineService {
 
   private void sleepBeforeRetry() {
     try {
-      log.info("[sleepBeforeRetry] 대기중");
+      log.info("[sleep] 5초 후, 재실행");
       Thread.sleep(5000);
     } catch (InterruptedException e) {
       log.error("[sleepBeforeRetry]", e);

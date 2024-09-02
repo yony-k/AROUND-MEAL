@@ -36,7 +36,7 @@ public class RawDataLoadService {
   private String FORMAT_TYPE;
 
   public synchronized void executeRawDataLoad(int startIndex, int endIndex) {
-    log.info("[executeRawDataLoad] 데이터 읽어오기 실행");
+    log.info("[execute] 데이터 읽어오기 - index {} to {}.", startIndex, endIndex);
 
     try {
       String responseData = fetchData(startIndex, endIndex).block();
@@ -51,15 +51,11 @@ public class RawDataLoadService {
         saveRawData(id, jsonData);
       }
     } catch (IOException e) {
-      log.error("[processRawDataSave] I/O error - ", e);
+      log.error("[fail] 데이터 읽어오기 - I/O error", e);
     } catch (WebClientResponseException e) {
-      log.error(
-          "[processRawDataSave] API call error - Status: {}, Body: {}",
-          e.getStatusCode(),
-          e.getResponseBodyAsString(),
-          e);
+      log.error("[fail] 데이터 읽어오기 - API call error", e);
     } catch (Exception e) {
-      log.error("[processRawDataSave] Unexpected error - ", e);
+      log.error("[fail] 데이터 읽어오기 - Unexpected error", e);
     }
   }
 
@@ -84,8 +80,7 @@ public class RawDataLoadService {
       RawRestaurant rawRestaurant =
           RawRestaurant.builder().id(id).jsonData(jsonData).isUpdated(true).hash(newHash).build();
       rawRestaurantRepository.save(rawRestaurant);
-      log.info(
-          "[saveRawData] Saved data - id : {}, new entry: {}", id, existedRawRestaurant == null);
+      log.info("[success] 원시 데이터 저장 - id : {}", id);
     }
   }
 }

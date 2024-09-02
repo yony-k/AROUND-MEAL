@@ -29,7 +29,7 @@ public class DataProcessService {
   private final GeometryUtil geometryUtil;
 
   public synchronized void executeDataProcess(int pageSize) {
-    log.info("[executeDataProcess] 데이터 가공하기 실행");
+    log.info("[execute] 데이터 가공하기 - size : {}.", pageSize);
 
     try {
       int page = 0;
@@ -56,14 +56,14 @@ public class DataProcessService {
                 rawRestaurantRepository.save(rawRestaurant);
               }
             } catch (Exception e) {
-              log.error("[dataProcessing] failed restaurant : {}", rawRestaurant.getId(), e);
+              log.error("[fail] 데이터 가공하기 id: {}", rawRestaurant.getId(), e);
             }
           }
         }
         page++;
       }
     } catch (Exception e) {
-      log.error("[processRawData] error", e);
+      log.error("[fail] 데이터 가공하기", e);
     }
   }
 
@@ -76,6 +76,7 @@ public class DataProcessService {
       String yStr = rootNode.path("Y").asText();
 
       if (xStr.isEmpty() || yStr.isEmpty()) {
+        log.warn("[skip] 유효하지 않은 데이터는 저장하지 않음 id {}", rawRestaurant.getId());
         return null;
       }
 
@@ -111,7 +112,7 @@ public class DataProcessService {
           .location(location)
           .build();
     } catch (Exception e) {
-      log.error("[convertToProcessedRestaurant] error ", e);
+      log.error("[fail] 데이터 파싱하기 ", e);
       return null;
     }
   }
