@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lucky.around.meal.common.security.details.PrincipalDetails;
 import com.lucky.around.meal.controller.request.RatingRequestDto;
 import com.lucky.around.meal.controller.response.RatingResponseDto;
-import com.lucky.around.meal.exception.CustomException;
-import com.lucky.around.meal.exception.exceptionType.SecurityExceptionType;
 import com.lucky.around.meal.service.RatingService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,10 +29,6 @@ public class RatingController {
   public ResponseEntity<RatingResponseDto> createRating(
       @RequestBody @Valid RatingRequestDto requestDto,
       @AuthenticationPrincipal PrincipalDetails principalDetails) {
-
-    if (principalDetails == null) {
-      throw new CustomException(SecurityExceptionType.REQUIRED_AUTHENTICATION);
-    }
 
     Long memberId = principalDetails.getMemberId();
     log.info("로그인 멤버 id : " + memberId);
