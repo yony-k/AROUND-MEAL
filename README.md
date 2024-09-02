@@ -135,18 +135,11 @@
 
 ### API 명세서
 
-▶️ [API 명세서 자세히보기](https://www.notion.so/API-197df8e5668f42baa79c96ffac873a47?pvs=21)
+▶️ [API 명세서 자세히보기](https://www.notion.so/API-eedd570467c7427782b8b71a10ae4001?pvs=4)
 
-| API 명칭 | HTTP 메서드 | 엔드포인트 | 설명 |
-| --- | --- | --- | --- |
-| **사용자 회원가입** | POST | `/api/register` | 새로운 사용자를 등록합니다. |
-| **사용자 로그인** | POST | `/api/login` | 사용자를 로그인시킵니다. |
-| **사용자 로그아웃** | POST | `/api/logout`  | 사용자를 로그아웃시킵니다. |
-| **맛집 목록 조회** | GET | `/api/posts` | 맛집 목록을 조회합니다. |
-| **맛집 평가 생성** | GET | `/api/posts/{id}` | 특정 게시물의 상세 정보를 조회합니다. |
-| **시군구 목록 조회** | PUT | `/api/posts/{id}/like` | 게시물에 좋아요를 추가합니다. |
-| **사용자 설정 업데이트** | PUT | `/api/posts/{id}/share` | 게시물을 공유합니다. |
-| **맛집 상세정보 조회** | GET | `/api/stats` | 게시물 통계 정보를 조회합니다. |
+![api](https://github.com/user-attachments/assets/954958e8-8c49-4b3d-b3e0-b0bfc014eb7a)
+
+
 
 </br>
 
