@@ -11,6 +11,7 @@ import com.lucky.around.meal.entity.Rating;
 import com.lucky.around.meal.entity.Restaurant;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.MemberExceptionType;
+import com.lucky.around.meal.exception.exceptionType.RatingException;
 import com.lucky.around.meal.exception.exceptionType.RestaurantExceptionType;
 import com.lucky.around.meal.repository.MemberRepository;
 import com.lucky.around.meal.repository.RatingRepository;
@@ -39,6 +40,14 @@ public class RatingService {
         restaurantRepository
             .findById(requestDto.restaurantId())
             .orElseThrow(() -> new CustomException(RestaurantExceptionType.RESTAURANT_NOT_FOUND));
+
+    // 중복 평가 방지
+    ratingRepository
+        .findByMemberAndRestaurant(memberId, requestDto.restaurantId())
+        .ifPresent(
+            existingRating -> {
+              throw new CustomException(RatingException.ALREADY_RATED);
+            });
 
     Rating rating =
         Rating.builder()
