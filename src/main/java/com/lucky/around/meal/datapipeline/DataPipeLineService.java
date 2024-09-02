@@ -22,9 +22,6 @@ public class DataPipeLineService {
   @Value("${API_PAGE_SIZE}")
   private int PAGE_SIZE;
 
-  private int rawDataLoadRetryCount;
-  private int dataProcessRetryCount;
-
   private final RawDataLoadService rawDataLoadService;
   private final DataProcessService dataProcessService;
 
