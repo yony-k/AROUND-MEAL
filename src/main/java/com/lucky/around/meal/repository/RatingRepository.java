@@ -1,6 +1,7 @@
 package com.lucky.around.meal.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,8 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
   @Query("SELECT AVG(r.score) FROM Rating r WHERE r.restaurant.id = :restaurantId")
   Double findAvgScoreByRestaurantId(@Param("restaurantId") String restaurantId);
+
+  @Query("SELECT r FROM Rating r WHERE r.member.id = :memberId AND r.restaurant.id = :restaurantId")
+  Optional<Rating> findByMemberAndRestaurant(
+      @Param("memberId") Long memberId, @Param("restaurantId") String restaurantId);
 }
