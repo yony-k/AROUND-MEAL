@@ -35,6 +35,13 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
   List<Restaurant> findRestaurantByRatingCount(@Param("count") final int count);
 
   @Query(
-      "select r from Restaurant r where ST_Distance(r.location, :memberLocation) <= 1000 and r.ratingAverage > 0 order by RAND() limit 1")
+      "select r from Restaurant r "
+          + "where ST_Distance("
+          + "    ST_Transform(ST_SetSRID(r.location, 4326), 4326), "
+          + "    ST_Transform(ST_SetSRID(:memberLocation, 4326), 4326)"
+          + ") <= 1000 "
+          + "and r.ratingAverage > 0 "
+          + "order by function('RANDOM') "
+          + "limit 1")
   Optional<Restaurant> findRecommendedRestaurantForMember(Point memberLocation);
 }
