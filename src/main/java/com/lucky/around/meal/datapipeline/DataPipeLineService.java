@@ -2,9 +2,11 @@ package com.lucky.around.meal.datapipeline;
 
 import java.time.Instant;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@EnableAsync
 public class DataPipeLineService {
   private static final int MAX_RETRY_COUNT = 3;
   private static final int RETRY_DELAY_MS = 5000;
@@ -27,15 +30,19 @@ public class DataPipeLineService {
   private final RawDataLoadService rawDataLoadService;
   private final DataProcessService dataProcessService;
 
-  @PostConstruct
-  public void init() {
-    log.info("[init] 데이터 파이프라인");
-    executeDataPipeLine();
+  @Bean
+  public ApplicationRunner initializer() {
+    return args -> {
+      log.info("애플리케이션 초기화 작업 수행 중...");
+      executeDataPipeLine();
+    };
   }
 
+  @Async
   @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
+  //  @Scheduled(cron = "0 */10 * * * *") // 10분마다
   public void executeDataPipeLine() {
-    log.info("[execute] 데이터 파이프라인");
+    log.info("데이터 파이프라인 시작 - 개수: {}", MAX_INDEX);
 
     Instant startTime = Instant.now(); // 작업 시작 시간 기록
 
@@ -56,7 +63,7 @@ public class DataPipeLineService {
 
     Instant endTime = Instant.now(); // 작업 종료 시간 기록
     long duration = java.time.Duration.between(startTime, endTime).toMillis();
-    log.info("[success] 데이터 파이프라인 완료 - 소요 시간: {} ms", duration);
+    log.info("데이터 파이프라인 완료 - 개수: {}, 소요 시간: {} ms", MAX_INDEX, duration);
   }
 
   private boolean loadRawData(int startIndex, int endIndex) {
@@ -64,13 +71,13 @@ public class DataPipeLineService {
     while (retryCount <= MAX_RETRY_COUNT) {
       try {
         rawDataLoadService.executeRawDataLoad(startIndex, endIndex);
-        log.info("[success] 데이터 읽어오기 ({}번째 시도).", retryCount);
+        log.info("데이터 읽어오기 완료 ({}번째 시도).", retryCount);
         return true;
       } catch (Exception e) {
-        log.error("[fail] 데이터 읽어오기 ({}번째 시도).", retryCount, e);
+        log.error("데이터 읽어오기 실패 ({}번째 시도).", retryCount, e);
         retryCount++;
         if (retryCount > MAX_RETRY_COUNT) {
-          log.error("[fail] 데이터 읽어오기 최대 재시도 횟수 초과", e);
+          log.error("데이터 읽어오기 실패 - 최대 재시도 횟수 초과", e);
           return false;
         }
         sleepBeforeRetry();
@@ -84,13 +91,13 @@ public class DataPipeLineService {
     while (retryCount <= MAX_RETRY_COUNT) {
       try {
         dataProcessService.executeDataProcess(PAGE_SIZE);
-        log.info("[success] 데이터 가공하기 ({}번째 시도).", retryCount);
+        log.info("데이터 가공하기 완료 ({}번째 시도).", retryCount);
         return true;
       } catch (Exception e) {
-        log.error("[fail] 데이터 가공하기 ({}번째 시도).", retryCount, e);
+        log.error("데이터 가공하기 실패 ({}번째 시도).", retryCount, e);
         retryCount++;
         if (retryCount > MAX_RETRY_COUNT) {
-          log.error("[fail] 데이터 가공하기 최대 재시도 횟수 초과", e);
+          log.error("데이터 가공하기 실패 - 최대 재시도 횟수 초과", e);
           return false;
         }
         sleepBeforeRetry();
@@ -101,10 +108,10 @@ public class DataPipeLineService {
 
   private void sleepBeforeRetry() {
     try {
-      log.info("[sleep] {}초 후, 재실행", RETRY_DELAY_MS);
+      log.info("{}초 대기, 재실행", RETRY_DELAY_MS);
       Thread.sleep(RETRY_DELAY_MS);
     } catch (InterruptedException e) {
-      log.error("[sleepBeforeRetry]", e);
+      log.error("[sleepBeforeRetry] error.", e);
       Thread.currentThread().interrupt();
     }
   }

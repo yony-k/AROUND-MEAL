@@ -28,8 +28,8 @@ public class DataProcessService {
   private final ObjectMapper objectMapper;
   private final GeometryUtil geometryUtil;
 
-  public synchronized void executeDataProcess(int pageSize) {
-    log.info("[execute] 데이터 가공하기 - size : {}.", pageSize);
+  public void executeDataProcess(int pageSize) {
+    log.info("데이터 가공하기 실행- size : {}.", pageSize);
 
     try {
       int page = 0;
@@ -46,7 +46,7 @@ public class DataProcessService {
 
         for (RawRestaurant rawRestaurant : rawRestaurants) {
           if (rawRestaurant.isUpdated()) {
-            //            log.info("[dataProcessing] 변경된 맛집 : {}", rawRestaurant.getJsonData());
+            log.info("업데이트된 맛집 id : {}", rawRestaurant.getId());
 
             try {
               Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
@@ -56,14 +56,14 @@ public class DataProcessService {
                 rawRestaurantRepository.save(rawRestaurant);
               }
             } catch (Exception e) {
-              log.error("[fail] 데이터 가공하기 id: {}", rawRestaurant.getId(), e);
+              log.error("데이터 가공하기 실패 id: {}", rawRestaurant.getId(), e);
             }
           }
         }
         page++;
       }
     } catch (Exception e) {
-      log.error("[fail] 데이터 가공하기", e);
+      log.error("데이터 가공하기 error.", e);
     }
   }
 
@@ -71,12 +71,11 @@ public class DataProcessService {
     try {
       JsonNode rootNode = objectMapper.readTree(rawRestaurant.getJsonData());
 
-      // 좌표 유효하지 않은 음식점은 저장하지 않기
+      // 좌표가 유효하지 않은 음식점은 저장하지 않기
       String xStr = rootNode.path("X").asText();
       String yStr = rootNode.path("Y").asText();
 
       if (xStr.isEmpty() || yStr.isEmpty()) {
-        //        log.info("[skip] 유효하지 않은 데이터는 저장하지 않음 id {}", rawRestaurant.getId());
         return null;
       }
 
