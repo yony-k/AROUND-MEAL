@@ -1,6 +1,7 @@
 package com.lucky.around.meal.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,4 +33,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
               + "GROUP BY r.id HAVING COUNT(r2.id) >= :count",
       nativeQuery = true)
   List<Restaurant> findRestaurantByRatingCount(@Param("count") final int count);
+
+  @Query(
+      "select r from Restaurant r where ST_Distance(r.location, :memberLocation) <= 1000 and r.ratingAverage > 0 order by RAND() limit 1")
+  Optional<Restaurant> findRecommendedRestaurantForMember(Point memberLocation);
 }
