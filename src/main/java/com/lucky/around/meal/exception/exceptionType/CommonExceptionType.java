@@ -22,6 +22,7 @@ public enum CommonExceptionType implements ExceptionType {
 
   // 500 Internal Server Error
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+  DISCORD_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "디스코드 메시지 전송에 실패했습니다."),
 
   // 변환 에러
   TRANS_ENTITY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Entity 변환 에러"),

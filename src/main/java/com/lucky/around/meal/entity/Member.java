@@ -40,10 +40,12 @@ public class Member {
   @Column(nullable = true)
   private double lat;
 
-  private boolean recommendationAlertsEnabled;
+  private String memberWebhookUrl;
+
+  private boolean launchRecommendAgree;
 
   public void updateRecommendationAlertEnabled(boolean recommendationAlertsEnabled) {
-    this.recommendationAlertsEnabled = recommendationAlertsEnabled;
+    this.launchRecommendAgree = recommendationAlertsEnabled;
   }
 
   public void updateLocation(double lon, double lat) {
