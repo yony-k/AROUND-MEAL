@@ -36,7 +36,7 @@ public class RawDataLoadService {
   private String FORMAT_TYPE;
 
   public void executeRawDataLoad(int startIndex, int endIndex) {
-    log.info("데이터 읽어오기 실행- index {} to {}.", startIndex, endIndex);
+    log.info("데이터 읽어오기 실행- index {} to {}", startIndex, endIndex);
 
     try {
       String responseData = fetchData(startIndex, endIndex).block();

@@ -33,32 +33,30 @@ public class DataPipeLineService {
   @Bean
   public ApplicationRunner initializer() {
     return args -> {
-      log.info("애플리케이션 초기화 작업 수행 중...");
+      log.info("애플리케이션 초기화!");
       executeDataPipeLine();
     };
   }
 
-  @Async
+  @Async("taskExecutor")
   @Scheduled(cron = "0 0 1 * * ?") // 매일 오전 1시 실행
-  //  @Scheduled(cron = "0 */10 * * * *") // 10분마다
+  //    @Scheduled(cron = "0 */5 * * * *") // 5분마다
   public void executeDataPipeLine() {
     log.info("데이터 파이프라인 시작 - 개수: {}", MAX_INDEX);
 
     Instant startTime = Instant.now(); // 작업 시작 시간 기록
 
     int startIndex = 1;
+    int currentPage = 0;
     while (startIndex <= MAX_INDEX) {
       int endIndex = startIndex + PAGE_SIZE - 1;
 
-      if (!loadRawData(startIndex, endIndex)) {
-        break;
-      }
-
-      if (!processData()) {
+      if (!loadRawData(startIndex, endIndex) || !processData(currentPage)) {
         break;
       }
 
       startIndex += PAGE_SIZE;
+      currentPage++;
     }
 
     Instant endTime = Instant.now(); // 작업 종료 시간 기록
@@ -70,10 +68,10 @@ public class DataPipeLineService {
     for (int i = 1; i <= MAX_RETRY_COUNT; i++) {
       try {
         rawDataLoadService.executeRawDataLoad(startIndex, endIndex);
-        log.info("데이터 읽어오기 완료 ({}번째 시도).", i);
+        log.info("데이터 읽어오기 완료 ({}번째 시도)", i);
         return true;
       } catch (Exception e) {
-        log.error("데이터 읽어오기 실패 ({}번째 시도).", i, e);
+        log.error("데이터 읽어오기 실패 ({}번째 시도)", i, e);
         sleepBeforeRetry();
       }
     }
@@ -82,14 +80,14 @@ public class DataPipeLineService {
     return false;
   }
 
-  private boolean processData() {
+  private boolean processData(int currentPage) {
     for (int i = 1; i <= MAX_RETRY_COUNT; i++) {
       try {
-        dataProcessService.executeDataProcess(PAGE_SIZE);
-        log.info("데이터 가공하기 완료 ({}번째 시도).", i);
+        dataProcessService.executeDataProcess(currentPage);
+        log.info("데이터 가공하기 완료 ({}번째 시도)", i);
         return true;
       } catch (Exception e) {
-        log.error("데이터 가공하기 실패 ({}번째 시도).", i, e);
+        log.error("데이터 가공하기 실패 ({}번째 시도)", i, e);
         sleepBeforeRetry();
       }
     }
@@ -103,7 +101,7 @@ public class DataPipeLineService {
       log.info("{}초 대기, 재실행", RETRY_DELAY_MS);
       Thread.sleep(RETRY_DELAY_MS);
     } catch (InterruptedException e) {
-      log.error("[sleepBeforeRetry] error.", e);
+      log.error("대기 error", e);
       Thread.currentThread().interrupt();
     }
   }

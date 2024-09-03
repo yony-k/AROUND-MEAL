@@ -3,6 +3,7 @@ package com.lucky.around.meal.datapipeline;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,42 +29,37 @@ public class DataProcessService {
   private final ObjectMapper objectMapper;
   private final GeometryUtil geometryUtil;
 
-  public void executeDataProcess(int pageSize) {
-    log.info("데이터 가공하기 실행- size : {}.", pageSize);
+  @Value("${API_PAGE_SIZE}")
+  private int PAGE_SIZE;
 
-    try {
-      int page = 0;
+  public void executeDataProcess(int page) {
+    log.info("데이터 가공하기 실행- page : {}", page);
 
-      while (true) {
-        Pageable pageRequest = PageRequest.of(page, pageSize);
-        Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
+    while (true) {
+      Pageable pageRequest = PageRequest.of(page, PAGE_SIZE);
+      Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
 
-        if (rawRestaurantsPage.isEmpty()) {
-          break; // 더 이상 처리할 데이터가 없으면 종료
-        }
+      if (rawRestaurantsPage.isEmpty()) {
+        break; // 더 이상 처리할 데이터가 없으면 종료
+      }
 
-        List<RawRestaurant> rawRestaurants = rawRestaurantsPage.getContent();
+      List<RawRestaurant> rawRestaurants = rawRestaurantsPage.getContent();
 
-        for (RawRestaurant rawRestaurant : rawRestaurants) {
-          if (rawRestaurant.isUpdated()) {
-            log.info("업데이트된 맛집 id : {}", rawRestaurant.getId());
-
-            try {
-              Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
-              if (processedRestaurant != null) {
-                restaurantRepository.save(processedRestaurant);
-                rawRestaurant.setUpdated(false);
-                rawRestaurantRepository.save(rawRestaurant);
-              }
-            } catch (Exception e) {
-              log.error("데이터 가공하기 실패 id: {}", rawRestaurant.getId(), e);
+      for (RawRestaurant rawRestaurant : rawRestaurants) {
+        if (rawRestaurant.isUpdated()) {
+          try {
+            Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
+            if (processedRestaurant != null) {
+              restaurantRepository.save(processedRestaurant);
+              rawRestaurant.setUpdated(false);
+              rawRestaurantRepository.save(rawRestaurant);
             }
+          } catch (Exception e) {
+            log.error("데이터 가공하기 실패 id: {}", rawRestaurant.getId(), e);
           }
         }
-        page++;
       }
-    } catch (Exception e) {
-      log.error("데이터 가공하기 error.", e);
+      page++;
     }
   }
 
@@ -111,7 +107,7 @@ public class DataProcessService {
           .location(location)
           .build();
     } catch (Exception e) {
-      log.error("[fail] 데이터 파싱하기 ", e);
+      log.error("데이터 파싱 실패 ", e);
       return null;
     }
   }
