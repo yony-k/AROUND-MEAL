@@ -129,10 +129,10 @@ public class ViewCountService {
     }
   }
 
-  // 조회수 초기화
-  @Scheduled(cron = "0 0 11,17 * * ?") // 매일 오전 11시와 오후 5시에 실행
+  // 1시간 기준 조회수 초기화
+  @Scheduled(cron = "0 0 * * * ?")
   public void resetViewCounts() {
-    Set<String> keys = redisTemplate.keys(VIEW_COUNT_KEY_PREFIX + "*");
+    Set<String> keys = redisTemplate.keys(HOURLY_VIEW_COUNT_KEY_PREFIX + "*");
     if (keys != null) {
       for (String key : keys) {
         redisTemplate.opsForValue().set(key, "0");
