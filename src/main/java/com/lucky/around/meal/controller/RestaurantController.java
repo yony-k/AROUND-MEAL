@@ -31,12 +31,12 @@ public class RestaurantController {
     return ResponseEntity.ok(restaurantDetail);
   }
 
-  // 조회수가 N개 이상인 맛집 상세 정보 조회
-  @GetMapping("/high-view-count")
-  public ResponseEntity<List<RestaurantDetailResponseDto>> getRestaurantsWithMinViews(
-      @RequestParam long minViews) {
+  // 조회수 기준으로 정렬된 맛집 상세 목록 조회
+  @GetMapping("/sorted-by-view-count")
+  public ResponseEntity<List<RestaurantDetailResponseDto>> getRestaurantsSortedByViewCount(
+      @RequestParam(defaultValue = "desc") String sort) {
     List<RestaurantDetailResponseDto> restaurants =
-        restaurantService.getRestaurantsWithMinViews(minViews);
+        restaurantService.getRestaurantsSortedByViewCount(sort);
     return ResponseEntity.ok(restaurants);
   }
 
