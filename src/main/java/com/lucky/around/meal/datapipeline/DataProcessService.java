@@ -3,6 +3,7 @@ package com.lucky.around.meal.datapipeline;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,42 +29,37 @@ public class DataProcessService {
   private final ObjectMapper objectMapper;
   private final GeometryUtil geometryUtil;
 
-  public synchronized void executeDataProcess(int pageSize) {
-    log.info("[execute] 데이터 가공하기 - size : {}.", pageSize);
+  @Value("${API_PAGE_SIZE}")
+  private int PAGE_SIZE;
 
-    try {
-      int page = 0;
+  public void executeDataProcess(int page) {
+    log.info("데이터 가공하기 실행- page : {}", page);
 
-      while (true) {
-        Pageable pageRequest = PageRequest.of(page, pageSize);
-        Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
+    while (true) {
+      Pageable pageRequest = PageRequest.of(page, PAGE_SIZE);
+      Page<RawRestaurant> rawRestaurantsPage = rawRestaurantRepository.findAll(pageRequest);
 
-        if (rawRestaurantsPage.isEmpty()) {
-          break; // 더 이상 처리할 데이터가 없으면 종료
-        }
+      if (rawRestaurantsPage.isEmpty()) {
+        break; // 더 이상 처리할 데이터가 없으면 종료
+      }
 
-        List<RawRestaurant> rawRestaurants = rawRestaurantsPage.getContent();
+      List<RawRestaurant> rawRestaurants = rawRestaurantsPage.getContent();
 
-        for (RawRestaurant rawRestaurant : rawRestaurants) {
-          if (rawRestaurant.isUpdated()) {
-            //            log.info("[dataProcessing] 변경된 맛집 : {}", rawRestaurant.getJsonData());
-
-            try {
-              Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
-              if (processedRestaurant != null) {
-                restaurantRepository.save(processedRestaurant);
-                rawRestaurant.setUpdated(false);
-                rawRestaurantRepository.save(rawRestaurant);
-              }
-            } catch (Exception e) {
-              log.error("[fail] 데이터 가공하기 id: {}", rawRestaurant.getId(), e);
+      for (RawRestaurant rawRestaurant : rawRestaurants) {
+        if (rawRestaurant.isUpdated()) {
+          try {
+            Restaurant processedRestaurant = convertToProcessedRestaurant(rawRestaurant);
+            if (processedRestaurant != null) {
+              restaurantRepository.save(processedRestaurant);
+              rawRestaurant.setUpdated(false);
+              rawRestaurantRepository.save(rawRestaurant);
             }
+          } catch (Exception e) {
+            log.error("데이터 가공하기 실패 id: {}", rawRestaurant.getId(), e);
           }
         }
-        page++;
       }
-    } catch (Exception e) {
-      log.error("[fail] 데이터 가공하기", e);
+      page++;
     }
   }
 
@@ -71,12 +67,11 @@ public class DataProcessService {
     try {
       JsonNode rootNode = objectMapper.readTree(rawRestaurant.getJsonData());
 
-      // 좌표 유효하지 않은 음식점은 저장하지 않기
+      // 좌표가 유효하지 않은 음식점은 저장하지 않기
       String xStr = rootNode.path("X").asText();
       String yStr = rootNode.path("Y").asText();
 
       if (xStr.isEmpty() || yStr.isEmpty()) {
-        //        log.info("[skip] 유효하지 않은 데이터는 저장하지 않음 id {}", rawRestaurant.getId());
         return null;
       }
 
@@ -112,7 +107,7 @@ public class DataProcessService {
           .location(location)
           .build();
     } catch (Exception e) {
-      log.error("[fail] 데이터 파싱하기 ", e);
+      log.error("데이터 파싱 실패 ", e);
       return null;
     }
   }
