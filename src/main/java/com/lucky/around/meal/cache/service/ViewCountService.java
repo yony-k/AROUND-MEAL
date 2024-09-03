@@ -1,5 +1,6 @@
 package com.lucky.around.meal.cache.service;
 
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,6 +139,23 @@ public class ViewCountService {
         redisTemplate.opsForValue().set(key, "0");
       }
     }
+  }
+
+  // Redis에서 모든 조회수 맛집ID와 함꼐 조회
+  public Map<String, Long> getAllViewCounts() {
+    Map<String, Long> viewCounts = new HashMap<>();
+    String pattern = VIEW_COUNT_KEY_PREFIX + "*";
+
+    Set<String> keys = redisTemplate.keys(pattern);
+    if (keys != null) {
+      for (String key : keys) {
+        String restaurantId = key.replace(VIEW_COUNT_KEY_PREFIX, "");
+        String countStr = redisTemplate.opsForValue().get(key);
+        Long count = countStr != null ? Long.parseLong(countStr) : 0L;
+        viewCounts.put(restaurantId, count);
+      }
+    }
+    return viewCounts;
   }
 
   private RestaurantDetailResponseDto mapRestaurantToDto(Restaurant restaurant) {
