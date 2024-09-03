@@ -46,7 +46,7 @@
 
 <details>
 <summary><strong>이슈 관리</strong></summary>
-![issue](https://github.com/user-attachments/assets/f74c4fb2-15ac-4a68-b040-5241ce8d1e29)
+<img src=https://github.com/user-attachments/assets/f74c4fb2-15ac-4a68-b040-5241ce8d1e29>
 
 </details>
 
@@ -145,7 +145,7 @@
 
 <details>
 <summary><strong>ERD</strong></summary>
-
+<img src=https://github.com/user-attachments/assets/4fc9a113-aee1-4cd9-9f6f-8ec9dab376a8>
 </details>
 
 <details>
@@ -295,42 +295,42 @@
 
 ## 기능 구현
 
-<details>
-<summary><strong>RESTful API</strong></summary>
-  
-- 사용자 회원가입 api
-- 사용자 로그인 api
-- 사용자 설정 업데이트 api
-- 사용자 정보 api
-- 시군구 목록 api
-- 맛집 목록 api
-- 맛집 상세정보 api
-- 맛집 평가 생성 api
-</details>
+### RESTful API
+#### 사용자 회원가입 api
 
-<details>
-<summary><strong>데이터 파이프라인</strong></summary>
-  
+#### 사용자 로그인 api
+
+#### 사용자 설정 업데이트 api
+
+#### 사용자 정보 api
+
+#### 시군구 목록 api
+- DB 내 존재하는 시군구 목록을 전체 조회하는 페이지
+- 시군구 정보가 담긴 csv 파일을 프로젝트 실행 시 DB에 바로 업로드 하는 기능 구현
+- 긴시간 변동 없는 성격을 지닌 데이터이기에 Redis와 연동한 캐싱을 진행하여 전체 조회 속도 개선
+#### 맛집 목록 api
+
+#### 맛집 상세정보 api
+
+#### 맛집 평가 생성 api
+- 로그인한 유저가 특정 식당에 대한 평가를 작성하는 페이지
+- 평가가 생성 되면 해당 맛집의 평점이 업데이트 되고, 전체 평점 평균을 계산하여 업데이트하는 로직 구현
+- 동일한 유저가 한 식당에 대해 중복 평가가 불가능하도록 예외처리
+
+### 데이터 파이프라인
 - 공공데이터 수집
 - 데이터 가공
 - 데이터 저장
 - 데이터 파이프라인 자동화
-</details>
 
-<details>
-<summary><strong>Webhook</strong></summary>
-  
+### Webhook 
 - Discord Webhook 을 활용한 점심 추천 서비스
-</details>
 
-<details>
-<summary><strong>기타</strong></summary>
-  
-- 시군구 데이터 업로드
-- 인기있는 맛집 캐싱
-- 조회수 N회 이상 맛집 캐싱
-- 맛집 상세정보 캐싱
-</details>
+### 기타
+시군구 데이터 업로드
+인기있는 맛집 캐싱
+조회수 N회 이상 맛집 캐싱
+맛집 상세정보 캐싱
 
 </br>
 
