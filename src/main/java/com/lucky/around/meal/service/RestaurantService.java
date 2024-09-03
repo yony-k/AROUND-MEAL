@@ -1,6 +1,6 @@
 package com.lucky.around.meal.service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.locationtech.jts.geom.Point;
@@ -15,8 +15,7 @@ import com.lucky.around.meal.controller.response.*;
 import com.lucky.around.meal.entity.*;
 import com.lucky.around.meal.exception.CustomException;
 import com.lucky.around.meal.exception.exceptionType.RestaurantExceptionType;
-import com.lucky.around.meal.repository.RatingRepository;
-import com.lucky.around.meal.repository.RestaurantRepository;
+import com.lucky.around.meal.repository.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,25 +35,30 @@ public class RestaurantService {
     return getRestaurantDetailFromDB(restaurantId);
   }
 
-  // 조회수가 N개 이상인 맛집 상세 정보 캐시 저장
-  @Cacheable(value = "highViewCountRestaurants", key = "#minViews")
-  public List<RestaurantDetailResponseDto> getRestaurantsWithMinViews(long minViews) {
-    // 조회수 N개 이상인 맛집을 DB에서 조회
+  // 조회수 기준으로 정렬된 맛집 상세 목록 조회
+  public List<RestaurantDetailResponseDto> getRestaurantsSortedByViewCount(String sortDirection) {
     List<Restaurant> restaurants = restaurantRepository.findAll();
+    List<RestaurantDetailResponseDto> restaurantList = convertToDto(restaurants);
+    Map<String, Long> viewCounts = viewCountService.getAllViewCounts();
+    return sortRestaurantsByViewCount(restaurantList, viewCounts, sortDirection);
+  }
 
-    // 조회수 기준에 따라 필터링
-    return restaurants.stream()
-        .filter(
-            restaurant -> {
-              Long viewCount = viewCountService.getViewCount(restaurant.getId());
-              return viewCount >= minViews;
-            })
-        .map(
-            restaurant -> {
-              List<RatingResponseDto> ratings = mapRatingsToDto(restaurant.getId());
-              return mapRestaurantToDto(restaurant, ratings);
-            })
-        .collect(Collectors.toList());
+  // 조회수 기준으로 맛집 목록 정렬
+  private List<RestaurantDetailResponseDto> sortRestaurantsByViewCount(
+      List<RestaurantDetailResponseDto> restaurantDtos,
+      Map<String, Long> viewCounts,
+      String sortDirection) {
+
+    Comparator<RestaurantDetailResponseDto> comparator =
+        Comparator.comparingLong(dto -> viewCounts.getOrDefault(dto.restaurantId(), 0L));
+
+    // 정렬 방향 설정
+    if ("desc".equalsIgnoreCase(sortDirection)) {
+      comparator = comparator.reversed();
+    }
+
+    // 맛집 리스트를 정렬하고 반환
+    return restaurantDtos.stream().sorted(comparator).toList();
   }
 
   // 평가 수 기준 맛집 상세 정보 목록 조회
@@ -69,6 +73,20 @@ public class RestaurantService {
                 })
             .toList();
     return result;
+  }
+
+  public List<GetRestaurantsDto> getRestaurantsWithinRange(
+      final double lat, final double lon, final double range, final String sort) {
+    List<Restaurant> restaurants;
+    Point location = geometryUtil.createPoint(lat, lon);
+    if ("rating".equalsIgnoreCase(sort)) {
+      restaurants = restaurantRepository.findRestaurantsWithinRangeByRating(location, range * 1000);
+    } else {
+      restaurants =
+          restaurantRepository.findRestaurantsWithinRangeByDistance(location, range * 1000);
+    }
+
+    return restaurants.stream().map(GetRestaurantsDto::toDto).collect(Collectors.toList());
   }
 
   // DB에서 맛집 상세 정보 조회
@@ -89,7 +107,7 @@ public class RestaurantService {
   private List<RatingResponseDto> mapRatingsToDto(String restaurantId) {
     return ratingRepository.findByRestaurantIdOrderByCreateAtDesc(restaurantId).stream()
         .map(this::mapRatingToDto)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // Rating 객체를 DTO로 변환
@@ -121,17 +139,14 @@ public class RestaurantService {
         ratings);
   }
 
-  public List<GetRestaurantsDto> getRestaurantsWithinRange(
-      final double lat, final double lon, final double range, final String sort) {
-    List<Restaurant> restaurants;
-    Point location = geometryUtil.createPoint(lat, lon);
-    if ("rating".equalsIgnoreCase(sort)) {
-      restaurants = restaurantRepository.findRestaurantsWithinRangeByRating(location, range * 1000);
-    } else {
-      restaurants =
-          restaurantRepository.findRestaurantsWithinRangeByDistance(location, range * 1000);
-    }
+  // 전체 맛집을 DTO로 변환
+  private List<RestaurantDetailResponseDto> convertToDto(List<Restaurant> restaurants) {
+    return restaurants.stream().map(this::convertRestaurantToDto).toList();
+  }
 
-    return restaurants.stream().map(GetRestaurantsDto::toDto).collect(Collectors.toList());
+  // 맛집을 DTO로 변환
+  private RestaurantDetailResponseDto convertRestaurantToDto(Restaurant restaurant) {
+    List<RatingResponseDto> ratings = mapRatingsToDto(restaurant.getId());
+    return mapRestaurantToDto(restaurant, ratings);
   }
 }

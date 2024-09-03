@@ -46,8 +46,8 @@ public class CacheConfig {
 
     // 특정 캐시 관리 (MAP)
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-    // regionList - 시군구 목록 조회 캐싱 TEST 10분
-    cacheConfigurations.put("regionList", defaultConfiguration.entryTtl(Duration.ofMinutes(10)));
+    // regionList - 시군구 목록 조회 캐싱 1년
+    cacheConfigurations.put("regionList", defaultConfiguration.entryTtl(Duration.ofDays(365)));
     // restaurantDetail - 맛집 상세 정보 캐싱 1시간
     cacheConfigurations.put("restaurantDetail", defaultConfiguration.entryTtl(Duration.ofHours(1)));
 

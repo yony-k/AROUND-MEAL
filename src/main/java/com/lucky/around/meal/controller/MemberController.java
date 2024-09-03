@@ -48,4 +48,11 @@ public class MemberController {
     memberService.reissueRefreshToken(request, response);
     return ResponseEntity.ok("토큰 재발급이 성공적으로 완료되었습니다.");
   }
+
+  // 맛집 추천 알람 여부
+  @PatchMapping
+  public ResponseEntity<Void> updateRecommendationAlerts(@RequestParam("enabled") boolean enabled) {
+    memberService.updateRecommendationAlertsEnabled(enabled);
+    return ResponseEntity.ok().build();
+  }
 }

@@ -1,5 +1,7 @@
 package com.lucky.around.meal.datapipeline;
 
+import java.time.Instant;
+
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,8 @@ public class DataPipeLineService {
   public void executeDataPipeLine() {
     log.info("[execute] 데이터 파이프라인");
 
+    Instant startTime = Instant.now(); // 작업 시작 시간 기록
+
     int startIndex = 1;
     while (startIndex <= MAX_INDEX) {
       int endIndex = startIndex + PAGE_SIZE - 1;
@@ -49,6 +53,10 @@ public class DataPipeLineService {
 
       startIndex += PAGE_SIZE;
     }
+
+    Instant endTime = Instant.now(); // 작업 종료 시간 기록
+    long duration = java.time.Duration.between(startTime, endTime).toMillis();
+    log.info("[success] 데이터 파이프라인 완료 - 소요 시간: {} ms", duration);
   }
 
   private boolean loadRawData(int startIndex, int endIndex) {
