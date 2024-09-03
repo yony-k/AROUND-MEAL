@@ -39,6 +39,9 @@ public class DiscordService {
   }
 
   private String getMessage(String memberName, Restaurant restaurant) {
+    if (restaurant == null) {
+      return memberName + "님, 주변에 추천할 수 있는 식당이 없습니다." + "\n" + "관리자를 통해 주변 식당을 등록해주세요.";
+    }
     return memberName
         + "님, 오늘의 추천 식당은 "
         + restaurant.getRestaurantName()
