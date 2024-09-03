@@ -40,6 +40,12 @@ public class Member {
   @Column(nullable = true)
   private double lat;
 
+  private boolean recommendationAlertsEnabled;
+
+  public void updateRecommendationAlertEnabled(boolean recommendationAlertsEnabled) {
+    this.recommendationAlertsEnabled = recommendationAlertsEnabled;
+  }
+
   public void updateLocation(double lon, double lat) {
     this.lon = round(lon, 6);
     this.lat = round(lat, 6);
