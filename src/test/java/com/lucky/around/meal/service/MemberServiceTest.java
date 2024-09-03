@@ -41,9 +41,12 @@ public class MemberServiceTest {
     String memberName = "sungmin11";
     String password = "123456";
     String email = "sungmin11@gmail.com";
+    String webhookUrl = "mockWebhookUrl";
+    boolean launchRecommendAgree = true;
 
     // RegisterRecord 초기화
-    registerRecord = new RegisterRecord(memberName, password, email);
+    registerRecord =
+        new RegisterRecord(memberName, password, email, webhookUrl, launchRecommendAgree);
 
     // Member 초기화
     member = Member.builder().memberName(memberName).password(encodedPassword).email(email).build();
