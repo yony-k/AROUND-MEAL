@@ -23,8 +23,8 @@ public class RecommendRestaurantService {
   private final RestaurantRepository restaurantRepository;
   private final GeometryUtil geometryUtil;
 
-  // @Scheduled(cron = "0 12 * * *")
-  @Scheduled(cron = "0 */2 * * * *")
+  @Scheduled(cron = "0 12 * * *") // 매일 12시에 실행
+  // @Scheduled(cron = "0 */2 * * * *") : 로컬 테스트 용
   public void recommendRestaurant() {
     List<Member> members = memberRepository.findAllWithLunchRecommendAgree();
     for (Member member : members) {
