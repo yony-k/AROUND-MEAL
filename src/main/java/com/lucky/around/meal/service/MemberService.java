@@ -3,8 +3,11 @@ package com.lucky.around.meal.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lucky.around.meal.common.security.details.PrincipalDetails;
 import com.lucky.around.meal.controller.dto.MemberDto;
@@ -61,5 +64,24 @@ public class MemberService {
   // 리프레시 토큰으로 액세스 토큰, 리프레시 토큰 재발급
   public void reissueRefreshToken(HttpServletRequest request, HttpServletResponse response) {
     jwtService.reissueRefreshToken(request, response);
+  }
+
+  // 맛집 추천 알람 여부 업데이트
+  @Transactional
+  public void updateRecommendationAlertsEnabled(boolean enabled) {
+    Member member = findMemberById(getCurrentMemberId());
+    member.updateRecommendationAlertEnabled(enabled);
+  }
+
+  private Member findMemberById(Long memberId) {
+    return memberRepository
+        .findById(memberId)
+        .orElseThrow(() -> new CustomException(MemberExceptionType.MEMBER_NOT_FOUND));
+  }
+
+  private Long getCurrentMemberId() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+    return principal.getMemberId();
   }
 }
