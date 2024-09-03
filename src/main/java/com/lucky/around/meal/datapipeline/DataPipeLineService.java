@@ -67,43 +67,35 @@ public class DataPipeLineService {
   }
 
   private boolean loadRawData(int startIndex, int endIndex) {
-    int retryCount = 1; // 재시도 횟수 초기화
-    while (retryCount <= MAX_RETRY_COUNT) {
+    for (int i = 1; i <= MAX_RETRY_COUNT; i++) {
       try {
         rawDataLoadService.executeRawDataLoad(startIndex, endIndex);
-        log.info("데이터 읽어오기 완료 ({}번째 시도).", retryCount);
+        log.info("데이터 읽어오기 완료 ({}번째 시도).", i);
         return true;
       } catch (Exception e) {
-        log.error("데이터 읽어오기 실패 ({}번째 시도).", retryCount, e);
-        retryCount++;
-        if (retryCount > MAX_RETRY_COUNT) {
-          log.error("데이터 읽어오기 실패 - 최대 재시도 횟수 초과", e);
-          return false;
-        }
+        log.error("데이터 읽어오기 실패 ({}번째 시도).", i, e);
         sleepBeforeRetry();
       }
     }
-    return false; // 실제로는 도달하지 않는 코드
+
+    log.error("데이터 읽어오기 실패 - 최대 재시도 횟수 초과");
+    return false;
   }
 
   private boolean processData() {
-    int retryCount = 1; // 재시도 횟수 초기화
-    while (retryCount <= MAX_RETRY_COUNT) {
+    for (int i = 1; i <= MAX_RETRY_COUNT; i++) {
       try {
         dataProcessService.executeDataProcess(PAGE_SIZE);
-        log.info("데이터 가공하기 완료 ({}번째 시도).", retryCount);
+        log.info("데이터 가공하기 완료 ({}번째 시도).", i);
         return true;
       } catch (Exception e) {
-        log.error("데이터 가공하기 실패 ({}번째 시도).", retryCount, e);
-        retryCount++;
-        if (retryCount > MAX_RETRY_COUNT) {
-          log.error("데이터 가공하기 실패 - 최대 재시도 횟수 초과", e);
-          return false;
-        }
+        log.error("데이터 가공하기 실패 ({}번째 시도).", i, e);
         sleepBeforeRetry();
       }
     }
-    return false; // 실제로는 도달하지 않는 코드
+
+    log.error("데이터 가공하기 실패 - 최대 재시도 횟수 초과");
+    return false;
   }
 
   private void sleepBeforeRetry() {
