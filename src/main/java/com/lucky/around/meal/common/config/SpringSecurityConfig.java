@@ -68,7 +68,11 @@ public class SpringSecurityConfig {
   // resources는 이미지, css, javascript 파일등에 대한 요청을 의미함
   @Bean
   WebSecurityCustomizer webSecurityCustomizer() {
-    return (webSecurity) -> webSecurity.ignoring().requestMatchers("/resources/**");
+    return (webSecurity) ->
+        webSecurity
+            .ignoring()
+            .requestMatchers(
+                "/resources/**", "/api/restaurants", "/api/restaurants/{restaurantId}");
   }
 
   // 인증 관련 필터
