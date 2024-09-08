@@ -1,15 +1,23 @@
-## 프로젝트 개요
+# 📑 목차
 
-### 기술 스택
+1. [프로젝트 개요](#1-프로젝트-개요)
+2. [프로젝트 관리](#2-프로젝트-관리)
+3. [기술 문서](#3-기술-문서)
+4. [기능 구현](#4-기능-구현)
+5. [트러블 슈팅](#5-트러블-슈팅)
+
+## 1. 프로젝트 개요
+
+### ⚙️ 기술 스택
 ![java](https://img.shields.io/badge/Java-17-blue?logo=java)
 ![spring-boot](https://img.shields.io/badge/SpringBoot-3.3.3-grren?logo=springboot)
 ![postgresql](https://img.shields.io/badge/PostgreSQL-16.4-blue?logo=postgresql)
 ![redis](https://img.shields.io/badge/Redis-7.4-red?logo=redis)
 
-### 요구사항
+### ✔️ 요구사항
 [위치 기반 맛집 추천 서비스](https://bow-hair-db3.notion.site/f2c5e47f67254726ba0ef8d894f7e8b9#f62425d8700b485da11338e3b0eb06c4)
 
-### 팀 구성
+### 👩🏻‍💻 팀 구성
 
 | 이름  | 담당                                    |
 |-----|-----------------------------------------|
@@ -21,17 +29,18 @@
 
 </br>
 
-## 프로젝트 관리
+## 2. 프로젝트 관리
 
 <details>
 <summary><strong>일정</strong></summary>
-  
+
 | 날짜 | 활동 |
 | --- | --- |
 | 24.08.27 (화) | 역할 분담, 기술 선택  |
 | ~ 24.08.30 (금) | 요구사항 기능 개발, 추가 요구사항 분담 |
 | ~ 24.09.01 (일)| 추가 요구사항 개발 |
 | 24.09.01 (월) | README.md 작성 및 추가 요구사항 점검|
+
 </details>
 
 <details>
@@ -127,19 +136,26 @@
 
 </br>
 
-## 기술 문서
+## 3. 기술 문서
 
-### 아키텍처
+### 🛠️ 아키텍처
 <img width="707" alt="architecture" src="https://github.com/user-attachments/assets/bea07fac-77ae-4fee-8e85-9f0e20905882">
 
 
-### API 명세서
+### 📄 API 명세서
 
-▶️ [API 명세서 자세히보기](https://www.notion.so/API-eedd570467c7427782b8b71a10ae4001?pvs=4)
+▶️ [API 명세서 자세히보기](https://www.notion.so/API-197df8e5668f42baa79c96ffac873a47?pvs=21)
 
-![api](https://github.com/user-attachments/assets/954958e8-8c49-4b3d-b3e0-b0bfc014eb7a)
-
-
+| API 명칭 | HTTP 메서드 | 엔드포인트 | 설명 |
+| --- | --- | --- | --- |
+| **사용자 회원가입** | POST | `/api/register` | 새로운 사용자를 등록합니다. |
+| **사용자 로그인** | POST | `/api/login` | 사용자를 로그인시킵니다. |
+| **사용자 로그아웃** | POST | `/api/logout`  | 사용자를 로그아웃시킵니다. |
+| **맛집 목록 조회** | GET | `/api/posts` | 맛집 목록을 조회합니다. |
+| **맛집 평가 생성** | GET | `/api/posts/{id}` | 특정 게시물의 상세 정보를 조회합니다. |
+| **시군구 목록 조회** | PUT | `/api/posts/{id}/like` | 게시물에 좋아요를 추가합니다. |
+| **사용자 설정 업데이트** | PUT | `/api/posts/{id}/share` | 게시물을 공유합니다. |
+| **맛집 상세정보 조회** | GET | `/api/stats` | 게시물 통계 정보를 조회합니다. |
 
 </br>
 
@@ -293,48 +309,322 @@
 
 </br>
 
-## 기능 구현
+## 4. 기능 구현
 
-### RESTful API
-#### 사용자 회원가입 api
+### ⭐ 사용자 인증 시스템
 
-#### 사용자 로그인 api
+#### ✨ 사용자 회원가입(담당: 김연희)
+- 계정명 중복 검증 기능 구현
+- 비밀번호 BCrypt 암호화 저장 기능 구현
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>계정명 중복 검증</strong></div>
+        <div>이번 프로젝트는 사용자의 위치를 활용한 서비스가 주 목적이기 때문에 회원가입 정보 검증 과정은 간단하게 중복검증 기능만 구현했습니다.</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/MemberController.java" target="_blank">MemberController</a></br>
+    </div>
+</details>
 
-#### 사용자 설정 업데이트 api
+#### ✨ 사용자 로그인(담당: 김연희)
+- 스프링 시큐리티 기능 구현
+- JWT 방식 차용하여 로그인 시 AccessToken, RefreshToken 발급 기능 구현
+- 핸들러를 사용한 필터 체인 내 예외처리 기능 구현
+- RefreshToken으로 AccessToken, RefreshToken 재발급 기능 구현
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>스프링 시큐리티 구현</strong></div>
+        <div>요청의 인증, 인가 처리를 간편하게 처리할 수 있기 때문에 스프링 시큐리티를 도입하였습니다. 로그인 처리를 전담하는 필터와, JWT 검증을 전담하는 필터를 커스텀하였고 각 필터에서 발생하는 예외는 예외의 종류에 따라 메세지를 달리하여 클라이언트에게 전달되도록 구현했습니다.</div>
+        <div><strong>RefreshToken 발급 구현</strong></div>
+        <div>AccessToken만으로는 보안상 취약하다고 판단되어 RefreshToken도 함께 발급하는 방식으로 구현했습니다. RefreshToken은 Redis에 저장하여 빠른 접근이 가능하도록 하였습니다.</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/tree/dev/src/main/java/com/lucky/around/meal/common/security" target="_blank">security</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/MemberController.java" target="_blank">MemberController</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/MemberService.java" target="_blank">MemberService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/JwtService.java" target="_blank">JwtService</a></br>
+    </div>
+</details>
 
-#### 사용자 정보 api
+#### ✨ 사용자 정보(담당: 김연희)
+- 사용자 상세 정보 반환 기능 구현
 
-#### 시군구 목록 api
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/MemberController.java" target="_blank">MemberController</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/MemberService.java" target="_blank">MemberService</a></br>
+    </div>
+</details>
+
+#### ✨ 사용자 설정 업데이트(담당: 유서정)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
+### ⭐ RESTful API
+
+#### ✨ 시군구 목록(담당: 안소나)
 - DB 내 존재하는 시군구 목록을 전체 조회하는 페이지
 - 시군구 정보가 담긴 csv 파일을 프로젝트 실행 시 DB에 바로 업로드 하는 기능 구현
 - 긴시간 변동 없는 성격을 지닌 데이터이기에 Redis와 연동한 캐싱을 진행하여 전체 조회 속도 개선
-#### 맛집 목록 api
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
 
-#### 맛집 상세정보 api
+#### ✨ 맛집 목록(담당: 김성은)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
 
-#### 맛집 평가 생성 api
+#### ✨ 맛집 상세정보(담당: 안소나)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
+#### ✨ 맛집 평가 생성(담당: 안소나)
 - 로그인한 유저가 특정 식당에 대한 평가를 작성하는 페이지
 - 평가가 생성 되면 해당 맛집의 평점이 업데이트 되고, 전체 평점 평균을 계산하여 업데이트하는 로직 구현
 - 동일한 유저가 한 식당에 대해 중복 평가가 불가능하도록 예외처리
 
-### 데이터 파이프라인
-- 공공데이터 수집
-- 데이터 가공
-- 데이터 저장
-- 데이터 파이프라인 자동화
+### ⭐ 데이터 파이프라인
+#### ✨ 공공데이터 수집(담당: 유하진)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
 
-### Webhook 
-- Discord Webhook 을 활용한 점심 추천 서비스
+#### ✨ 데이터 가공(담당: 유하진)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
 
-### 기타
-시군구 데이터 업로드
-인기있는 맛집 캐싱
-조회수 N회 이상 맛집 캐싱
-맛집 상세정보 캐싱
+#### ✨ 데이터 저장(담당: 유하진)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
+#### ✨ 데이터 파이프라인 자동화(담당: 유하진)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
+### ⭐ Webhook
+#### ✨ Discord Webhook 을 활용한 점심 추천 서비스(담당: 김성은)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
+### ⭐ 대규모 트래픽 대비 캐싱
+#### ✨ 시군구 데이터 캐싱(담당: 안소나)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
+#### ✨ 평가수 N개 이상 맛집 캐싱(담당: 김연희)
+- Redis 와 스케줄러를 이용해서 하루 한 번 새벽 1시에 자동 업로드 기능 구현
+- 데이터 동기화를 위해 필드 값 수정이 용이하도록 해시맵으로 변환 후 저장 기능 구현
+- 평가가 N개 이상 존재하는 맛집 목록 조회 요청 시 캐싱된 데이터 반환 기능 구현
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>새벽 1시 자동 업로드</strong></div>
+        <div>평가수가 몇 시간 단위로 크게 변하지 않을 것 같아 갱신 주기를 하루로 설정하고 서비스 사용량이 비교적 적을 것이라고 예상되는 새벽 1시에 교체작업을 진행하기로 결정했습니다. 목록이 교체되는 시간은 매우 짧을 것이라고 예상되어 Read Through 패턴을 적용하여 DB에서 데이터를 조회해오지는 않게 하였으며 만일 교체되는 시간에 요청이 있을 시 양해 메세지를 반환하도록 구현하였습니다.</div>
+        <div><strong>해시맵 저장</strong></div>
+        <div>DB와 Redis의 정보 동기화를 위해서는 평가 생성 등의 요청이 생길 때 양쪽 모두 정보를 업데이트해줘야합니다.(Write Through 패턴 적용) 이때 Redis에서는 한 객체의 한 필드만 업데이트하면 되기 때문에 객체가 아닌 해시맵 형태로 저장하는 것이 효율적이라고 판단했습니다.</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/cache/service/RatingCountService.java" target="_blank">RatingCountService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RestaurantController.java" target="_blank">RestaurantController: getRestaurantsByRaitinCount</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RestaurantService.java" target="_blank">RestaurantService: RestaurantService</a></br>
+    </div>
+</details>
+
+#### ✨ 조회수 N회 이상 맛집 캐싱(담당: 유서정)
+- 채워주세요
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>제목 1</strong></div>
+        <div>내용 1</div>
+        <div><strong>제목 2</strong></div>
+        <div>내용 2</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+    </div>
+</details>
+
 
 </br>
 
-## 트러블 슈팅
-- 캐싱 전략
-- 데이터 파이프라인 전략
-- postgis
+## 5. 트러블 슈팅
+👉[캐싱 전략]</br>
+👉[데이터 파이프라인 전략]</br>
+👉[postgis]</br>
+👉[스프링 시큐리티 필터체인 예외처리](https://www.notion.so/b599de75f9594552890cdd68bd0d0841) </br>
+👉[JWT 버전차이로 인한 파싱 오류](https://www.notion.so/JWT-200c685081cf4697a50ea810c1b0c614) </br>
