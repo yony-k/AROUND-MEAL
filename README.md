@@ -1,5 +1,4 @@
-# 📑 목차
-
+# 주변한끼 (Around Meal)
 1. [프로젝트 개요](#1-프로젝트-개요)
 2. [프로젝트 관리](#2-프로젝트-관리)
 3. [기술 문서](#3-기술-문서)
@@ -165,7 +164,7 @@
 </details>
 
 <details>
-<summary><strong>디렉토리 구조 - 도메인이 많지 않아 기능별로 패키지를 나누었습니다.</strong></summary>
+<summary><strong>디렉토리 구조 - 도메인이 많지 않아 계층별로 패키지를 나누었습니다.</strong></summary>
 
 
 ```bash
@@ -454,84 +453,28 @@
 - 평가가 생성 되면 해당 맛집의 평점이 업데이트 되고, 전체 평점 평균을 계산하여 업데이트하는 로직 구현
 - 동일한 유저가 한 식당에 대해 중복 평가가 불가능하도록 예외처리
 
-### ⭐ 데이터 파이프라인
-#### ✨ 공공데이터 수집(담당: 유하진)
-- 채워주세요
+### ⭐ 데이터 파이프라인 (담당: 유하진)
+- 공공데이터 OpenAPI 활용
+- 데이터 파이프라인 (수집,가공, 저장) 구현
+- 스케줄링을 통한 주기적인 데이터 파이프라인 실행
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>읽기/가공 책임분리</strong></div>
+        <div>데이터 읽어오기 (API 호출 -> 원본 저장)과 데이터 가공하기 (원본 테이블 -> 가공 데이터 저장)로 책임을 분리했습니다. 데이터를 가공하는 도중 오류가 발생하더라도, 처음인 데이터 읽어오기부터 실행하지 않고 데이터 가공하기 과정만 재시도 됩니다. 또한 원본 테이블과 가공 테이블도 따로 관리되어, 원본 데이터를 그대로 보존하고 있으므로, 데이터를 다양하게 가공할 수 있습니다.</div>
+        </br>
+        <div><strong>해시와 플래그를 활용한 데이터 변경 감지</strong></div>
+        <div>해시값을 비교하여 변경된 데이터를 식별합니다. 변경된 데이터는 변경 플래그로 명시합니다. 가공 테이블에는 변경 플래그로 표시된 데이터만 저장하도록 합니다. 데이터 저장 및 가공하는 처리 비용을 절감할 수 있습니다.</div>
+        </br>
+        <div><strong>데이터 파이프라인 비동기화</strong></div>
+        <div>@Async 어노테이션을 사용하여 데이터 파이프라인 비동기처리할 수 있도록 하였습니다. 데이터 파이프라인이 진행되더라도 메인 스레드는 기다리지 않고 작업을 진행합니다.</div>
+        </br>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-    </div>
-</details>
-
-#### ✨ 데이터 가공(담당: 유하진)
-- 채워주세요
-<details>
-    <summary>구현 의도</summary>
-    <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
-    </div>
-</details>
-<details>
-    <summary>구현 코드</summary>
-    <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-    </div>
-</details>
-
-#### ✨ 데이터 저장(담당: 유하진)
-- 채워주세요
-<details>
-    <summary>구현 의도</summary>
-    <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
-    </div>
-</details>
-<details>
-    <summary>구현 코드</summary>
-    <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-    </div>
-</details>
-
-#### ✨ 데이터 파이프라인 자동화(담당: 유하진)
-- 채워주세요
-<details>
-    <summary>구현 의도</summary>
-    <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
-    </div>
-</details>
-<details>
-    <summary>구현 코드</summary>
-    <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/tree/dev/src/main/java/com/lucky/around/meal/datapipeline" target="_blank">데이터 파이프라인 패키지</a>
     </div>
 </details>
 
