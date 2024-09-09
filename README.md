@@ -384,27 +384,25 @@
     </div>
 </details>
 
+---
 ### ⭐ RESTful API
 
 #### ✨ 시군구 목록(담당: 안소나)
 - DB 내 존재하는 시군구 목록을 전체 조회하는 페이지
 - 시군구 정보가 담긴 csv 파일을 프로젝트 실행 시 DB에 바로 업로드 하는 기능 구현
-- 긴시간 변동 없는 성격을 지닌 데이터이기에 Redis와 연동한 캐싱을 진행하여 전체 조회 속도 개선
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>CSV 파일을 통한 데이터 업로드 자동화</strong></div>
+        <div>프로젝트 실행 시 별도의 작업 없이 DB내 CSV 파일 데이터가 자동 업로드되도록 구현했습니다. 약 300개 정도의 고정된 데이터이므로 파일을 읽어들이는 while문 내에서 직접 저장하지 않고, 유효성 검사를 마친 데이터를 List에 담아 한번에 저장하는 방식을 선택했습니다. </div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/CsvRegionService.java" target="_blank">CsvRegionService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RegionService.java" target="_blank">RegionService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RegionController.java" target="_blank">RegionController</a></br>
     </div>
 </details>
 
@@ -428,7 +426,7 @@
     </div>
 </details>
 
-#### ✨ 맛집 상세정보(담당: 안소나)
+#### ✨ 맛집 상세정보(담당: 유서정)
 - 채워주세요
 <details>
     <summary>구현 의도</summary>
@@ -453,6 +451,27 @@
 - 평가가 생성 되면 해당 맛집의 평점이 업데이트 되고, 전체 평점 평균을 계산하여 업데이트하는 로직 구현
 - 동일한 유저가 한 식당에 대해 중복 평가가 불가능하도록 예외처리
 
+<details>
+    <summary>구현 의도</summary>
+    <div>
+        <div><strong>평가 중복 방지 및 데이터 무결성 유지</strong></div>
+        <div>한 회원이 동일한 음식점에 중복 평가를 하지 않도록 중복 검사 로직을 추가하여 데이터의 무결성을 보장했습니다. 또한, 평가 생성 시 평가 요청 DTO, 컨트롤러 내에 `@Valid`를 적용하여 잘못된 데이터 입력을 방지하도록 구현했습니다.</div>
+        <br>
+        <div><strong>음식점 평점 업데이트</strong></div>
+        <div>음식점에 새로운 평가가 등록될 때 해당 음식점의 평균 평점을 갱신하는 로직을 추가해 최신 데이터를 유지하도록 구현했습니다.</div>
+    </div>
+</details>
+<details>
+    <summary>구현 코드</summary>
+    <div>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RatingService.java" target="_blank">RatingService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RatingController.java" target="_blank">RatingController</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/request/RatingRequestDto.java" target="_blank">RatingRequestDto</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/repository/RatingRepository.java" target="_blank">RatingRepository</a></br>
+   </div>
+</details>
+
+---
 ### ⭐ 데이터 파이프라인 (담당: 유하진)
 - 공공데이터 OpenAPI 활용
 - 데이터 파이프라인 (수집,가공, 저장) 구현
@@ -478,6 +497,7 @@
     </div>
 </details>
 
+---
 ### ⭐ Webhook
 #### ✨ Discord Webhook 을 활용한 점심 추천 서비스(담당: 김성은)
 - 채워주세요
@@ -499,24 +519,21 @@
     </div>
 </details>
 
+---
 ### ⭐ 대규모 트래픽 대비 캐싱
 #### ✨ 시군구 데이터 캐싱(담당: 안소나)
-- 채워주세요
+- 긴시간 변동 없는 성격을 지닌 데이터이기에 Redis와 연동한 캐싱을 진행하여 전체 조회 속도 개선
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>캐싱을 통한 조회 속도 개선</strong></div>
+        <div>시군구 정보는 변경되지 않기 때문에 Redis와 같은 캐싱처리를 도입하여 데이터베이스에 불필요한 접근을 줄였습니다. 이를 통해 조회 성능을 약 3배 향상시켰습니다.</div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/config/CacheConfig.java" target="_blank">CacheConfig</a>
     </div>
 </details>
 
