@@ -365,22 +365,29 @@
 </details>
 
 #### ✨ 사용자 설정 업데이트(담당: 유서정)
-- 채워주세요
+- 정적 위치 정보 저장 (DB)
+- 실시간 위치 정보 저장 (Redis)
+- 맛집 추천 서비스 사용 여부 업데이트
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>정적 위치 정보의 일관된 관리</strong></div>
+        <div>장기적인 데이터로 데이터베이스에 보관하여, 안전하고 일관된 위치 데이터를 제공하도록 구현하였습니다.</div><br>
+        <div><strong>실시간 위치 정보 처리의 효율성</strong></div>
+        <div>실시간으로 자주 업데이트되는 위치 정보는 Redis를 사용하여 빠르게 읽고 쓸 수 있도록 하여, 사용자가 실시간으로 자신의 위치 정보를 즉시 반영할 수 있도록 하였습니다.</div><br>
+	<div><strong>맛집 추천 서비스 활성화/비활성화 기능</strong></div>
+        <div>사용자가 해당 설정을 변경하면, 이 값이 데이터베이스에 저장되어 서비스의 상태를 반영하도록 구현하였습니다.</div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/LocationService.java" target="_blank">LocationService</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/LocationController.java" target="_blank">LocationController</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/redis/RedisRepository.java" target="_blank">StringRedisTemplate</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/MemberService.java" target="_blank">MemberService</a></br>
+    </div>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/MemberController.java" target="_blank">MemberController</a></br>
     </div>
 </details>
 
@@ -427,22 +434,33 @@
 </details>
 
 #### ✨ 맛집 상세정보(담당: 유서정)
-- 채워주세요
+- 캐시를 활용한 맛집 상세 정보 조회
+- 조회수 기준으로 맛집 목록 정렬
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>효율적인 데이터 접근 및 응답 속도 개선</strong></div>
+        <div>캐시를 활용하여 자주 조회되는 맛집의 상세 정보를 빠르게 제공할 수 있도록 구현하였습니다. 
+		캐시가 없는 경우에는 데이터베이스에서 해당 정보를 조회하여 캐시에 저장하고, 이후 요청 시 캐시된 데이터를 반환합니다.
+		이를 통해 부하 테스트 결과, 데이터 처리량이 4.92배 향상되었고 응답 시간은 1.2배 단축되었습니다.
+		이로 인해 사용자에게는 빠르고 일관된 정보를 제공할 수 있었으며, 데이터베이스의 부하도 크게 줄일 수 있었습니다.<br>
+<p>
+    <img src="https://github.com/user-attachments/assets/cede1456-2f76-4827-b386-df2c2bebc672" alt="Performance Test Results">
+</p>
+</div>
+        <div><strong>조회수 기준 정렬</strong></div>
+        <div>맛집 목록을 조회수 기준으로 정렬하여 사용자에게 인기 있는 맛집을 우선적으로 보여줍니다. 
+		이를 통해 사용자 경험을 향상시키고, 자주 조회되는 맛집이 상위에 노출되도록 하여 사용자에게 유용한 정보를 제공합니다. 
+		정렬 방향을 지원하여 다양한 요구 사항에 맞게 데이터를 제공할 수 있도록 구현하였습니다.</div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/repository/RestaurantRepository.java" target="_blank">RestaurantRepository</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RestaurantService.java" target="_blank">RestaurantService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RestaurantController.java" target="_blank">RestaurantController</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/cache/service/ViewCountService.java" target="_blank">ViewCountService</a>
     </div>
 </details>
 
@@ -560,22 +578,36 @@
 </details>
 
 #### ✨ 조회수 N회 이상 맛집 캐싱(담당: 유서정)
-- 채워주세요
+- 스케줄러를 사용하여 매시 정각, 일정 조회수 이상인 맛집의 상세 정보를 Redis에 자동으로 캐싱
+- 상세 정보 조회 시 조회수 증가 기능
+- 스케줄러를 사용하여 1시간 단위로 조회수를 초기화
+- 조회수 데이터 조회
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>효율적인 데이터 관리</strong></div>
+        <div>조회수 기준으로 맛집 정보를 캐싱하여 자주 조회되는 맛집의 정보를 빠르게 제공할 수 있습니다. 
+		또한, 매시 정각마다 캐시 데이터를 정기적으로 업데이트하여 최신 정보를 유지합니다. 
+		이를 통해 시스템의 성능을 안정적으로 관리하고, 캐시된 데이터를 활용하여 응답 속도를 개선하며 사용자 경험을 향상시키도록 구현하였습니다.</div><br>
+	<div><strong>상세 조회 시 조회수 증가</strong></div>
+	<div>사용자가 맛집의 상세 정보를 조회할 때마다 해당 맛집의 조회수를 증가시킵니다. 
+		이를 통해 인기 있는 맛집의 정보를 보다 효과적으로 캐싱하고, 사용자와의 상호작용에 따라 데이터를 동적으로 관리할 수 있도록 구현하였습니다.</div><br>
+        <div><strong>1시간 기준 조회수와 영구적 조회수의 분리 관리</strong></div>
+        <div>1시간 기준 조회수는 단기적인 조회 패턴을 반영하며, 1시간마다 초기화되어 최신 상태를 유지합니다. 
+		반면, 영구적인 조회수는 장기적인 조회 패턴을 추적하고, 전체 조회수를 기반으로 맛집 정보를 캐시합니다. 
+		이러한 분리를 통해 데이터의 정확성을 유지하고, 실시간 및 장기적인 분석 모두를 지원하도록 구현하였습니다.</div><br>
+	<div><strong>유연한 데이터 관리</strong></div>
+        <div>Redis를 활용하여 캐시된 데이터를 효율적으로 관리하고 분석할 수 있는 기능을 제공합니다. 
+		이를 통해 1시간 기준 조회수와 같은 단기 데이터뿐만 아니라 영구적인 데이터의 일관성을 유지하며, 시스템의 데이터 관리 및 분석을 용이하게 합니다.</div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/config/CacheConfig.java" target="_blank">CacheConfig: 직렬화/역직렬화 커스터마이징</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RestaurantService.java" target="_blank">RestaurantService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/cache/service/ViewCountService.java" target="_blank">ViewCountService</a></br>
+	<a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RestaurantController.java" target="_blank">RestaurantController</a></br>
     </div>
 </details>
 
