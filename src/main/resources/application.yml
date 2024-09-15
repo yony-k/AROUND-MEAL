@@ -19,7 +19,7 @@ spring:
 
   data:
     redis:
-      host: redis
+      host: ${REDIS_HOST}
       port: 6379
       prefix: 'Refresh:'
 
@@ -41,7 +41,7 @@ cookie:
     cookie-name: Refresh
     limit-time: 259200
     accepted-url: /api/members/refresh_token
-    domain: localhost
+    domain: ${COOKIE_DOMAIN}
     http-only: true
 
 cache:
