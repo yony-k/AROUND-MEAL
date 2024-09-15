@@ -1,5 +1,5 @@
 FROM openjdk:17
 ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
+COPY ${JAR_FILE} around-meal.jar
 ENV TZ=Asia/Seoul
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "/around-meal.jar"]

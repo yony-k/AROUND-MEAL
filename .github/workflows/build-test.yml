@@ -65,5 +65,5 @@ jobs:
           docker pull ${{ secrets.DOCKER_USERNAME }}/around-meal:latest
           docker stop $(docker ps -q --filter 'name=around-meal')
           docker rm $(docker ps -a -q --filter 'name=around-meal' )
-          docker run -d --log-driver=syslog -p 8080:8080 --name around-meal --network yonyk-network ${{ secrets.DOCKER_USERNAME }}/around-meal:latest 
+          docker run -d --log-driver=syslog -p 8081:8080 --name around-meal --network yonyk-network ${{ secrets.DOCKER_USERNAME }}/around-meal:latest 
           docker image prune -a -f
