@@ -1,8 +1,8 @@
-name: build-test
+name: deploy
 
 on:
   push:
-    branches: [ "deploy/ci-cd" ]
+    branches: [ "main" ]
 
 jobs:
   build:
