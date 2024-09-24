@@ -14,15 +14,15 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
 
   @Query(
       "SELECT r FROM Restaurant r "
-          + "WHERE ST_Distance(ST_Transform(r.location, 4326), ST_Transform(:location, 4326)) <= :range "
+          + "WHERE ST_Distance(r.location, :location) <= :range "
           + "ORDER BY r.ratingAverage DESC")
   List<Restaurant> findRestaurantsWithinRangeByRating(
       @Param("location") final Point location, @Param("range") final double range);
 
   @Query(
       "SELECT r FROM Restaurant r "
-          + "WHERE ST_Distance(ST_Transform(r.location, 4326), ST_Transform(:location, 4326)) <= :range "
-          + "ORDER BY ST_Distance(ST_Transform(r.location, 4326), ST_Transform(:location, 4326)) ASC")
+          + "WHERE ST_Distance(r.location, :location) <= :range "
+          + "ORDER BY ST_Distance(r.location, :location) ASC")
   List<Restaurant> findRestaurantsWithinRangeByDistance(
       @Param("location") final Point location, @Param("range") final double range);
 
@@ -35,18 +35,12 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
   List<Restaurant> findRestaurantByRatingCount(@Param("count") final int count);
 
   @Query(
-      "select r from Restaurant r "
-          + "where ST_Distance("
-          + "    ST_Transform(ST_SetSRID(r.location, 4326), 4326), "
-          + "    ST_Transform(ST_SetSRID(:memberLocation, 4326), 4326)"
-          + ") <= 1000 "
-          + "and r.ratingAverage > ("
-          + "       select AVG(r2.ratingAverage) from Restaurant r2 "
-          + "           where ST_Distance("
-          + "              ST_Transform(ST_SetSRID(r.location, 4326), 4326), "
-          + "              ST_Transform(ST_SetSRID(:memberLocation, 4326), 4326)"
-          + "           ) <= 1000 "
-          + "   ) "
-          + "order by function('RANDOM')")
+      "SELECT r FROM Restaurant r "
+          + "WHERE ST_Distance(r.location, :memberLocation) <= 1000 "
+          + "AND r.ratingAverage > ("
+          + "    SELECT AVG(r2.ratingAverage) FROM Restaurant r2 "
+          + "    WHERE ST_Distance(r2.location, :memberLocation) <= 1000"
+          + ") "
+          + "ORDER BY function('RANDOM')")
   Optional<Restaurant> findRecommendedRestaurantForMember(Point memberLocation);
 }
