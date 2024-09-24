@@ -13,7 +13,7 @@ public class GeometryUtil {
   private final GeometryFactory geometryFactory;
 
   public Point createPoint(final double lon, final double lat) {
-    Point point = geometryFactory.createPoint(new Coordinate(lon, lat));
+    Point point = geometryFactory.createPoint(new Coordinate(lon, lat)); // X: lon, Y: lat
     point.setSRID(4326);
     return point;
   }
