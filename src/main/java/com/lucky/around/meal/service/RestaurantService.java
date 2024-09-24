@@ -23,6 +23,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RestaurantService {
 
+  private static final String RESTAURANT_SORT_OPTION_RATING = "rating";
+  private static final String RESTAURANT_SORT_OPTION_DISTANCE = "distance";
+
   private final RestaurantRepository restaurantRepository;
   private final GeometryUtil geometryUtil;
   private final RatingRepository ratingRepository;
@@ -80,8 +83,8 @@ public class RestaurantService {
     List<Restaurant> restaurants;
     Point location = geometryUtil.createPoint(lon, lat);
     double distanceInMeters = range * 1000;
-    boolean isRatingSort = "rating".equalsIgnoreCase(sort);
-    boolean isDistanceSort = "distance".equalsIgnoreCase(sort);
+    boolean isRatingSort = RESTAURANT_SORT_OPTION_RATING.equalsIgnoreCase(sort);
+    boolean isDistanceSort = RESTAURANT_SORT_OPTION_DISTANCE.equalsIgnoreCase(sort);
 
     if (isRatingSort) {
       restaurants =
