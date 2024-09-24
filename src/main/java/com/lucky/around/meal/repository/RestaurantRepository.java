@@ -40,8 +40,13 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
           + "    ST_Transform(ST_SetSRID(r.location, 4326), 4326), "
           + "    ST_Transform(ST_SetSRID(:memberLocation, 4326), 4326)"
           + ") <= 1000 "
-          + "and r.ratingAverage > 0 "
-          + "order by function('RANDOM') "
-          + "limit 1")
+          + "and r.ratingAverage > ("
+          + "       select AVG(r2.ratingAverage) from Restaurant r2 "
+          + "           where ST_Distance("
+          + "              ST_Transform(ST_SetSRID(r.location, 4326), 4326), "
+          + "              ST_Transform(ST_SetSRID(:memberLocation, 4326), 4326)"
+          + "           ) <= 1000 "
+          + "   ) "
+          + "order by function('RANDOM')")
   Optional<Restaurant> findRecommendedRestaurantForMember(Point memberLocation);
 }
