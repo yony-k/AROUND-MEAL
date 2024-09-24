@@ -78,16 +78,19 @@ public class RestaurantService {
   public List<GetRestaurantsDto> getRestaurantsWithinRange(
       final double lat, final double lon, final double range, final String sort) {
     List<Restaurant> restaurants;
-    Point location = geometryUtil.createPoint(lat, lon);
+    Point location = geometryUtil.createPoint(lon, lat);
     double distanceInMeters = range * 1000;
     boolean isRatingSort = "rating".equalsIgnoreCase(sort);
+    boolean isDistanceSort = "distance".equalsIgnoreCase(sort);
 
     if (isRatingSort) {
       restaurants =
           restaurantRepository.findRestaurantsWithinRangeByRating(location, distanceInMeters);
-    } else {
+    } else if (isDistanceSort) {
       restaurants =
           restaurantRepository.findRestaurantsWithinRangeByDistance(location, distanceInMeters);
+    } else {
+      throw new CustomException(RestaurantExceptionType.INVALID_SORT_TYPE);
     }
 
     return restaurants.stream().map(GetRestaurantsDto::toDto).collect(Collectors.toList());
