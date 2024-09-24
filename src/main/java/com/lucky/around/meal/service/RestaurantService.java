@@ -79,11 +79,15 @@ public class RestaurantService {
       final double lat, final double lon, final double range, final String sort) {
     List<Restaurant> restaurants;
     Point location = geometryUtil.createPoint(lat, lon);
-    if ("rating".equalsIgnoreCase(sort)) {
-      restaurants = restaurantRepository.findRestaurantsWithinRangeByRating(location, range * 1000);
+    double distanceInMeters = range * 1000;
+    boolean isRatingSort = "rating".equalsIgnoreCase(sort);
+
+    if (isRatingSort) {
+      restaurants =
+          restaurantRepository.findRestaurantsWithinRangeByRating(location, distanceInMeters);
     } else {
       restaurants =
-          restaurantRepository.findRestaurantsWithinRangeByDistance(location, range * 1000);
+          restaurantRepository.findRestaurantsWithinRangeByDistance(location, distanceInMeters);
     }
 
     return restaurants.stream().map(GetRestaurantsDto::toDto).collect(Collectors.toList());
