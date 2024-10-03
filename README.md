@@ -525,22 +525,21 @@
 ---
 ### ⭐ Webhook
 #### ✨ Discord Webhook 을 활용한 점심 추천 서비스(담당: 김성은)
-- 채워주세요
+- 점심시간에 사용자 위치를 기반으로 맛집을 추천하는 스케줄러 구현
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>1. 점심 시간에 자동으로 사용자 주변 위치의 맛집을 webhook으로 추천하도록하여 서비스 고도화</strong></div>
+        <div>사용자 위치를 기반으로 반경 1km 이내면서, 1km 반경 이내 맛집들의 평균 평점보다 높은 곳을 랜덤하게 discord webhook을 통해 추천하는 기능을 개발하였습니다.</div>
+        <div><strong>2. 맛집 추천 알림 전송 로직 비동기화</strong></div>
+        <div>맛집 추천 알림 전송 로직을 비동기로 처리하여 회원들에게 알림을 전송하는 로직이 병렬처리 될 수 있도록 개선하였습니다</div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RecommendRestaurantService.java" target="_blank">RecommendRestaurantService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/discord/service/DiscordService.java" target="_blank">DiscordService</a></br>
     </div>
 </details>
 
