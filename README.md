@@ -308,7 +308,7 @@
 ```
 </details>
 
-</br>
+<br>
 
 ## 4. 기능 구현
 
@@ -416,14 +416,14 @@
 </details>
 
 #### ✨ 맛집 목록(담당: 김성은)
-- 채워주세요
+- PostGIS를 활용하여 사용자의 현재 위치를 기반으로 범위 내의 맛집을 조회하는 기능
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>1. 정렬 기능</strong></div>
+        <div>주변 맛집을 가까운 거리 순, 평점이 높은 순으로 조회하는 정렬 옵션을 제공합니다</div>
+        <div><strong>2. 위치 범위 선택</strong></div>
+        <div>위치 제공에 동의한 사용자의 현재 위치를 바탕으로 주변 맛집을 검색하며, 0.5Km, 1km 두가지 옵션을 선택하여 검색할 수 있습니다</div>
     </div>
 </details>
 <details>
