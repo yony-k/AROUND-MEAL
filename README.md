@@ -133,7 +133,7 @@
     ```
 </details>
 
-</br>
+<br>
 
 ## 3. 기술 문서
 
@@ -143,7 +143,7 @@
 
 ### 📄 API 명세서
 
-▶️ [API 명세서 자세히보기](https://www.notion.so/API-197df8e5668f42baa79c96ffac873a47?pvs=21)
+▶️ [API 명세서 자세히보기](https://www.notion.so/API-eedd570467c7427782b8b71a10ae4001?pvs=4)
 
 | API 명칭 | HTTP 메서드 | 엔드포인트 | 설명 |
 | --- | --- | --- | --- |
@@ -308,7 +308,7 @@
 ```
 </details>
 
-</br>
+<br>
 
 ## 4. 기능 구현
 
@@ -416,22 +416,27 @@
 </details>
 
 #### ✨ 맛집 목록(담당: 김성은)
-- 채워주세요
+- PostGIS를 활용하여 사용자의 현재 위치를 기반으로 범위 내의 맛집을 조회하는 기능
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>1. 정렬 기능</strong></div>
+        <div>주변 맛집을 가까운 거리 순, 평점이 높은 순으로 조회하는 정렬 옵션을 제공합니다</div>
+        <div><strong>2. 위치 범위 선택</strong></div>
+        <div>위치 제공에 동의한 사용자의 현재 위치를 바탕으로 주변 맛집을 검색하며, 0.5Km, 1km 두가지 옵션을 선택하여 검색할 수 있습니다</div>
+        <div><strong>3. PostGIS 플러그인 사용</strong></div>
+        <div>Postgresql 플러그인 PostGIS를 사용하여 사용자 위치과 가게 위치를 Point로 표현하고, ST_DWithin 함수를 활용하여
+효율적으로 특정 반경 내의 객체를 검색합니다 </div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RestaurantController.java#L43-L51" target="_blank">RestaurantController</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/215c43d72be822dc5ab1f1983c056f30c562930f/src/main/java/com/lucky/around/meal/service/RestaurantService.java#L81-L100" target="_blank">RestaurantService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/215c43d72be822dc5ab1f1983c056f30c562930f/src/main/java/com/lucky/around/meal/repository/RestaurantRepository.java#L15-L27" target="_blank">RestaurantRepository</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/entity/Restaurant.java" target="_blank">Restaurant(Entity)</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/util/GeometryUtil.java" target="_blank">GeometryUtil(support for gis)</a></br>
     </div>
 </details>
 
@@ -520,22 +525,21 @@
 ---
 ### ⭐ Webhook
 #### ✨ Discord Webhook 을 활용한 점심 추천 서비스(담당: 김성은)
-- 채워주세요
+- 점심시간에 사용자 위치를 기반으로 맛집을 추천하는 스케줄러 구현
 <details>
     <summary>구현 의도</summary>
     <div>
-        <div><strong>제목 1</strong></div>
-        <div>내용 1</div>
-        <div><strong>제목 2</strong></div>
-        <div>내용 2</div>
+        <div><strong>1. 점심 시간에 자동으로 사용자 주변 위치의 맛집을 webhook으로 추천하도록하여 서비스 고도화</strong></div>
+        <div>사용자 위치를 기반으로 반경 1km 이내면서, 1km 반경 이내 맛집들의 평균 평점보다 높은 곳을 랜덤하게 discord webhook을 통해 추천하는 기능을 개발하였습니다.</div>
+        <div><strong>2. 맛집 추천 알림 전송 로직 비동기화</strong></div>
+        <div>맛집 추천 알림 전송 로직을 비동기로 처리하여 회원들에게 알림을 전송하는 로직이 병렬처리 될 수 있도록 개선하였습니다</div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/service/RecommendRestaurantService.java" target="_blank">RecommendRestaurantService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/discord/service/DiscordService.java" target="_blank">DiscordService</a></br>
     </div>
 </details>
 
@@ -614,7 +618,7 @@
 </details>
 
 
-</br>
+<br>
 
 ## 5. 트러블 슈팅
 👉[캐싱 전략]</br>
