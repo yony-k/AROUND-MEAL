@@ -424,14 +424,19 @@
         <div>주변 맛집을 가까운 거리 순, 평점이 높은 순으로 조회하는 정렬 옵션을 제공합니다</div>
         <div><strong>2. 위치 범위 선택</strong></div>
         <div>위치 제공에 동의한 사용자의 현재 위치를 바탕으로 주변 맛집을 검색하며, 0.5Km, 1km 두가지 옵션을 선택하여 검색할 수 있습니다</div>
+        <div><strong>3. PostGIS 플러그인 사용</strong></div>
+        <div>Postgresql 플러그인 PostGIS를 사용하여 사용자 위치과 가게 위치를 Point로 표현하고, ST_DWithin 함수를 활용하여
+효율적으로 특정 반경 내의 객체를 검색합니다 </div>
     </div>
 </details>
 <details>
     <summary>구현 코드</summary>
     <div>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
-        <a href="클래스 주소" target="_blank">클래스 이름</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/controller/RestaurantController.java#L43-L51" target="_blank">RestaurantController</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/215c43d72be822dc5ab1f1983c056f30c562930f/src/main/java/com/lucky/around/meal/service/RestaurantService.java#L81-L100" target="_blank">RestaurantService</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/215c43d72be822dc5ab1f1983c056f30c562930f/src/main/java/com/lucky/around/meal/repository/RestaurantRepository.java#L15-L27" target="_blank">RestaurantRepository</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/entity/Restaurant.java" target="_blank">Restaurant(Entity)</a></br>
+        <a href="https://github.com/wanted-pre-onboarding-backend-team-7/AROUND-MEAL/blob/dev/src/main/java/com/lucky/around/meal/common/util/GeometryUtil.java" target="_blank">GeometryUtil(support for gis)</a></br>
     </div>
 </details>
 
