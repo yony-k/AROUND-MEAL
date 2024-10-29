@@ -1,5 +1,7 @@
 package com.lucky.around.meal.datapipeline;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
 
 import org.locationtech.jts.geom.Point;
@@ -36,20 +38,27 @@ public class ProcessService {
       while (true) {
         // 수집한 데이터 가져오기
         RawData rawData = dataQueue.getCollectQueue().take();
-        log.info("가공: " + rawData.getData());
-
         // 데이터 가공하기
+        List<Restaurant> restaurantList = new ArrayList<>();
+
         JsonNode rootNode = objectMapper.readTree(rawData.getData());
         JsonNode rowNodes = rootNode.path(SERVICE_NAME).path("row");
 
         for (JsonNode rowNode : rowNodes) {
           String id = rowNode.path("MGTNO").asText("");
 
+          // 업데이트된 데이터만 가공하기
+          //          String updateGBN = rowNode.path("UPDATEGBN").asText("");
+          //          if (updateGBN.equals("I")) continue;
+
           // 좌표가 유효하지 않은 음식점은 저장하지 않기
           String xStr = rowNode.path("X").asText();
           String yStr = rowNode.path("Y").asText();
 
-          if (xStr.isEmpty() || yStr.isEmpty()) continue;
+          if (xStr.isEmpty() || yStr.isEmpty()) {
+            log.info("[가공] 유효하지 않은 데이터 : " + id);
+            continue;
+          }
 
           double longitude = Double.parseDouble(xStr);
           double latitude = Double.parseDouble(yStr);
@@ -81,20 +90,19 @@ public class ProcessService {
                   .sigungu(sigungu)
                   .location(location)
                   .build();
-
-          //          log.info("id: " + restaurant.getId() + ", restaurantName: " +
-          // restaurant.getRestaurantName());
-
-          // 가공된 데이터 큐에 넣기
-          BlockingDeque<ParsedData> processQueue = dataQueue.getProcessQueue();
-          ParsedData parsedData = new ParsedData(restaurant);
-          processQueue.put(parsedData);
-          log.info("가공 큐 크기: " + processQueue.size());
+          restaurantList.add(restaurant);
         }
+
+        // 가공된 데이터 큐에 넣기
+        BlockingDeque<ParsedData> processQueue = dataQueue.getProcessQueue();
+        ParsedData parsedData = new ParsedData(restaurantList);
+        processQueue.put(parsedData);
       }
     } catch (InterruptedException e) {
+      log.error("가공 error", e);
       Thread.currentThread().interrupt();
     } catch (JsonProcessingException e) {
+      log.error("가공 error", e);
       throw new RuntimeException(e);
     }
   }

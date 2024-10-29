@@ -45,13 +45,12 @@ public class CollectService {
         // API 호출
         int endIndex = startIndex + (PAGE_SIZE - 1);
         String responseData = fetchRawData(startIndex, endIndex).block();
-        log.info("API 호출: " + startIndex + "~" + endIndex);
+        log.info("[수집] API 호출: " + startIndex + "~" + endIndex);
 
         // 수집한 결과를 큐에 담음
         BlockingDeque<RawData> collectQueue = dataQueue.getCollectQueue();
         RawData rawData = new RawData(responseData);
         collectQueue.put(rawData);
-        //        log.info("수집 큐 크기: " + collectQueue.size());
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
