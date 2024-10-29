@@ -34,10 +34,17 @@ public class ProcessService {
   @Async
   public void processData() {
     try {
-      // while이면 언제 반복이 끝나는거지? 큐가 비어있을 때?
       while (true) {
         // 수집한 데이터 가져오기
         RawData rawData = dataQueue.getCollectQueue().take();
+
+        // 종료 신호 수신하고, 전달하기
+        if (rawData.getData().equals("FIN")) {
+          log.info("[가공] 종료 신호를 수신했습니다.");
+          dataQueue.getProcessQueue().put(new ParsedData(new ArrayList<>()));
+          break;
+        }
+
         // 데이터 가공하기
         List<Restaurant> restaurantList = new ArrayList<>();
 

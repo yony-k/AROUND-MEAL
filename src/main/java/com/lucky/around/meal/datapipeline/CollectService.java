@@ -52,6 +52,9 @@ public class CollectService {
         RawData rawData = new RawData(responseData);
         collectQueue.put(rawData);
       }
+
+      // 종료 신호 전달
+      dataQueue.getCollectQueue().put(new RawData("FIN"));
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }

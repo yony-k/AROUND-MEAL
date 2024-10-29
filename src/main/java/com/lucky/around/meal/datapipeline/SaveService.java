@@ -20,6 +20,13 @@ public class SaveService {
       while (true) {
         // 가공된 데이터 가져오기
         ParsedData parsedData = dataQueue.getProcessQueue().take();
+
+        // 종료 신호 수신하기 (빈 배열 받기)
+        if (parsedData.getData().isEmpty()) {
+          log.info("[저장] 종료 신호를 수신했습니다.");
+          break;
+        }
+
         restaurantJdbcRepository.saveAll(parsedData.getData());
       }
     } catch (InterruptedException e) {
