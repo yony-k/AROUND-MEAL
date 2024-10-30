@@ -23,7 +23,8 @@ public class RestaurantJdbcRepository {
     String sql =
         "INSERT INTO restaurant "
             + "(id, restaurant_name, dosi, sigungu, category, rating_average, restaurant_tel, jibun_detail_address, doro_detail_address, \"location\") "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_GeomFromText(?, 4326))";
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_GeomFromText(?, 4326)) "
+            + "ON CONFLICT (id) DO NOTHING";
 
     WKTWriter wktWriter = new WKTWriter();
 
