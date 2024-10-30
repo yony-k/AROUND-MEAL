@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.locationtech.jts.io.WKTWriter;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,8 +22,10 @@ public class RestaurantJdbcRepository {
   public void saveAll(List<Restaurant> restaurantList) {
     String sql =
         "INSERT INTO restaurant "
-            + "(id, restaurant_name, dosi, sigungu, category, rating_average) "
-            + "VALUES (?, ?, ?, ?, ?, ?)";
+            + "(id, restaurant_name, dosi, sigungu, category, rating_average, restaurant_tel, jibun_detail_address, doro_detail_address, \"location\") "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ST_GeomFromText(?, 4326))";
+
+    WKTWriter wktWriter = new WKTWriter();
 
     jdbcTemplate.batchUpdate(
         sql,
@@ -36,6 +39,10 @@ public class RestaurantJdbcRepository {
             ps.setString(4, restaurant.getSigungu());
             ps.setString(5, String.valueOf(restaurant.getCategory()));
             ps.setDouble(6, 0);
+            ps.setString(7, restaurant.getRestaurantTel());
+            ps.setString(8, restaurant.getJibunDetailAddress());
+            ps.setString(9, restaurant.getDoroDetailAddress());
+            ps.setString(10, wktWriter.write(restaurant.getLocation()));
           }
 
           @Override

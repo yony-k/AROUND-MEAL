@@ -41,7 +41,7 @@ public class CollectService {
   public void collectData() {
     try {
       // 1~100, 101~200, 201~300 ...
-      for (int startIndex = 1; startIndex <= MAX_INDEX; startIndex += PAGE_SIZE) {
+      for (int startIndex = 259500; startIndex <= MAX_INDEX; startIndex += PAGE_SIZE) {
         // API 호출
         int endIndex = startIndex + (PAGE_SIZE - 1);
         String responseData = fetchRawData(startIndex, endIndex).block();

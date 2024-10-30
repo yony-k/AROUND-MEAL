@@ -63,7 +63,7 @@ public class ProcessService {
           String yStr = rowNode.path("Y").asText();
 
           if (xStr.isEmpty() || yStr.isEmpty()) {
-            log.info("[가공] 유효하지 않은 데이터 : " + id);
+            //            log.info("[가공] 위치 정보가 제공되지 않은 데이터는 건너뜁니다. : " + id);
             continue;
           }
 
@@ -79,11 +79,17 @@ public class ProcessService {
           String[] jibunAddresses = splitAddress(jibunAddress);
           String dosi = jibunAddresses[0];
           String sigungu = jibunAddresses[1];
-          String jibunDetailAddress = jibunAddresses[2];
+          String jibunDetailAddress = "";
+          if (jibunAddresses.length > 2) {
+            jibunDetailAddress = jibunAddresses[2];
+          }
 
           String doroAddress = rowNode.path("RDNWHLADDR").asText();
           String[] doroAddresses = splitAddress(doroAddress);
-          String doroDetailAddress = doroAddresses[2];
+          String doroDetailAddress = "";
+          if (doroAddresses.length > 2) {
+            doroDetailAddress = doroAddresses[2];
+          }
 
           Restaurant restaurant =
               Restaurant.builder()
