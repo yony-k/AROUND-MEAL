@@ -26,11 +26,19 @@ public class DataPipeline {
   }
 
   @Async("taskExecutor")
-  @Scheduled(cron = "0 0 0 * * ?")
   public void runDataPipeline() throws InterruptedException {
     // 각 단계별 비동기 작업 시작
     collectService.collectData();
     processService.processData();
     saveService.saveData();
+  }
+
+  @Async("taskExecutor")
+  @Scheduled(cron = "0 0 1 * * ?")
+  public void repeatDataPipeline() throws InterruptedException {
+    // 각 단계별 비동기 작업 시작
+    collectService.collectData();
+    processService.processUpdatedData();
+    saveService.updateData();
   }
 }
