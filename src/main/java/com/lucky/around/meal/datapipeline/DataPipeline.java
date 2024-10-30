@@ -22,6 +22,7 @@ public class DataPipeline {
   public ApplicationRunner initializer() {
     return args -> {
       runDataPipeline();
+      //      repeatDataPipeline();
     };
   }
 
@@ -29,7 +30,7 @@ public class DataPipeline {
   public void runDataPipeline() throws InterruptedException {
     // 각 단계별 비동기 작업 시작
     collectService.collectData();
-    processService.processData();
+    processService.processData(false);
     saveService.saveData();
   }
 
@@ -38,7 +39,7 @@ public class DataPipeline {
   public void repeatDataPipeline() throws InterruptedException {
     // 각 단계별 비동기 작업 시작
     collectService.collectData();
-    processService.processUpdatedData();
+    processService.processData(true);
     saveService.updateData();
   }
 }
