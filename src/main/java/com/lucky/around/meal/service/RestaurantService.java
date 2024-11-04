@@ -23,6 +23,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RestaurantService {
 
+  private static final String RESTAURANT_SORT_OPTION_RATING = "rating";
+  private static final String RESTAURANT_SORT_OPTION_DISTANCE = "distance";
+
   private final RestaurantRepository restaurantRepository;
   private final GeometryUtil geometryUtil;
   private final RatingRepository ratingRepository;
@@ -78,12 +81,19 @@ public class RestaurantService {
   public List<GetRestaurantsDto> getRestaurantsWithinRange(
       final double lat, final double lon, final double range, final String sort) {
     List<Restaurant> restaurants;
-    Point location = geometryUtil.createPoint(lat, lon);
-    if ("rating".equalsIgnoreCase(sort)) {
-      restaurants = restaurantRepository.findRestaurantsWithinRangeByRating(location, range * 1000);
-    } else {
+    Point location = geometryUtil.createPoint(lon, lat);
+    double distanceInMeters = range * 1000;
+    boolean isRatingSort = RESTAURANT_SORT_OPTION_RATING.equalsIgnoreCase(sort);
+    boolean isDistanceSort = RESTAURANT_SORT_OPTION_DISTANCE.equalsIgnoreCase(sort);
+
+    if (isRatingSort) {
       restaurants =
-          restaurantRepository.findRestaurantsWithinRangeByDistance(location, range * 1000);
+          restaurantRepository.findRestaurantsWithinRangeByRating(location, distanceInMeters);
+    } else if (isDistanceSort) {
+      restaurants =
+          restaurantRepository.findRestaurantsWithinRangeByDistance(location, distanceInMeters);
+    } else {
+      throw new CustomException(RestaurantExceptionType.INVALID_SORT_TYPE);
     }
 
     return restaurants.stream().map(GetRestaurantsDto::toDto).collect(Collectors.toList());
